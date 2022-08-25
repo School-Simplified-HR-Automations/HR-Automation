@@ -24,75 +24,24 @@ const dbSql = new Sequelize('mysql://tyler:HR-AZURE-3719-AEcF@hr-automations.db.
     dialectOptions: {
         ssl: {
             require: true
-        }
+        },
+        multipleStatements: true
     }
 })
 // model declarations
-const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildMessages] });
-// @ts-ignore
-client.commands = new Collection()
-const commandsPath = path.join(__dirname, 'commands')
-const eventsPath = path.join(__dirname, 'events')
 
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith("ts"))
 
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file)
-    const command = require(filePath)
-    // @ts-ignore
-    client.commands.set(command.data?.name, command)
-}
-// When the client is ready, run this code (only once)
-const Department = dbSql.define('Department', {
+const Team = dbSql.define('Team', {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     }
 })
-const DiscordInformation = dbSql.define('DiscordInfo', {
-    username: {
-        type: DataTypes.STRING,
-        validate: {
-            is: /.{1,}#[0-9]{4}/
-        },
-        allowNull: false
-    },
-    discordId: {
-        type: DataTypes.STRING,
-        validate: {
-            is: /[0-9]{17,}/
-        },
-        allowNull: false,
-        unique: true
-    }
-})
-const Position = dbSql.define('Position', {
+const Supervisor = dbSql.define("Supervisor", {
     title: {
         type: DataTypes.STRING,
         allowNull: false
-    }
-})
-const PositionHistory = dbSql.define("PositionHistory", {
-    rank: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    dept: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    team: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    joined: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    left: {
-        type: DataTypes.DATE,
-        allowNull: true
     }
 })
 const StaffFile = dbSql.define('StaffFile', {
@@ -116,57 +65,120 @@ const StaffFile = dbSql.define('StaffFile', {
         allowNull: true
     }
 })
-const Supervisor = dbSql.define("Supervisor", {
+const PositionHistory = dbSql.define("PositionHistory", {
     title: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    dept: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    team: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    joined: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    quit: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 })
-const Team = dbSql.define('Team', {
+const Position = dbSql.define('Position', {
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    }
+})
+const DiscordInformation = dbSql.define('DiscordInfo', {
+    username: {
+        type: DataTypes.STRING,
+        validate: {
+            is: /.{1,}#[0-9]{4}/
+        },
+        allowNull: false
+    },
+    discordId: {
+        type: DataTypes.STRING,
+        validate: {
+            is: /[0-9]{17,}/
+        },
+        allowNull: false,
+        unique: true
+    }
+})
+const Department = dbSql.define('Department', {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     }
 })
-const Tickets = dbSql.define('TicketStorage', {
-    author: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    category: {
-        type: DataTypes.STRING,
-        validate: {
-            isIn: [["bot", "gen", "db", "br"]]
-        },
-        allowNull: false
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    messages: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-})
-Department.hasMany(Supervisor)
-Department.hasMany(StaffFile)
-DiscordInformation.belongsTo(StaffFile)
-Position.belongsTo(PositionHistory)
-PositionHistory.belongsTo(StaffFile)
-PositionHistory.hasOne(Position)
-PositionHistory.hasOne(Department)
+
+// Supervisor Associations
+Supervisor.hasMany(Department)
+Department.belongsTo(Supervisor)
+
+Supervisor.belongsTo(StaffFile)
+StaffFile.hasOne(Supervisor)
+
+Supervisor.hasMany(Team)
+Team.belongsTo(Supervisor)
+
+// StaffFile Associations
 StaffFile.hasOne(DiscordInformation)
+DiscordInformation.belongsTo(StaffFile)
+
 StaffFile.hasMany(PositionHistory)
-StaffFile.belongsTo(Department)
+PositionHistory.belongsTo(StaffFile)
+
 StaffFile.belongsTo(Team)
-Supervisor.hasOne(StaffFile)
-Supervisor.belongsTo(Department)
-Team.belongsTo(Department)
-Team.hasMany(Supervisor)
 Team.hasMany(StaffFile)
 
+StaffFile.belongsTo(Department)
+Department.hasMany(StaffFile)
+
+Position.hasMany(StaffFile)
+StaffFile.belongsToMany(Position, {
+    through: "PositionStaff"
+})
+
+// Team Associations
+
+Team.belongsTo(Department)
+Department.hasMany(Team)
+
+// Others
+
+Position.hasMany(PositionHistory)
+PositionHistory.belongsTo(Position)
+
+Department.hasMany(PositionHistory)
+PositionHistory.belongsTo(Department)
+
+Position.belongsTo(Department)
+Department.hasMany(Position)
+
+
+
+const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildMessages] });
+// @ts-ignore
+client.commands = new Collection()
+const commandsPath = path.join(__dirname, 'commands')
+const eventsPath = path.join(__dirname, 'events')
+
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith("ts"))
+
+for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file)
+    const command = require(filePath)
+    // @ts-ignore
+    client.commands.set(command.data?.name, command)
+}
 
 
 client.once('ready', async () => {
@@ -196,4 +208,4 @@ deploy()
 client.login(process.env.TOKEN);
 
 export default client
-export { dbSql }
+export { dbSql, Department, DiscordInformation, PositionHistory, Position, StaffFile, Supervisor, Team }

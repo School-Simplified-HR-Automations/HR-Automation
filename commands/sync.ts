@@ -7,7 +7,7 @@ module.exports = {
     .setDescription("You don't need this."),
     async execute(interaction: ChatInputCommandInteraction) {
         if (!(interaction.user.id == "413462464022446084")) return
-        await dbSql.sync({ force: true, logging: true }).then((res) => {
+        await dbSql.sync({ logging: true, alter: true }).then((res) => {
             return interaction.reply(`Done.`)
         })
     }

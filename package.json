@@ -14,6 +14,7 @@
     "@discordjs/builders": "^1.1.0",
     "@discordjs/collection": "^1.0.1",
     "@discordjs/rest": "^1.0.1",
+    "@sapphire/stopwatch": "^1.4.1",
     "@types/ms": "^0.7.31",
     "@types/node": "*",
     "@types/nodemailer": "^6.4.5",

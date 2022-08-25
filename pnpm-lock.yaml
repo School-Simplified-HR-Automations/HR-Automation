@@ -4,6 +4,7 @@ specifiers:
   '@discordjs/builders': ^1.1.0
   '@discordjs/collection': ^1.0.1
   '@discordjs/rest': ^1.0.1
+  '@sapphire/stopwatch': ^1.4.1
   '@types/ms': ^0.7.31
   '@types/node': '*'
   '@types/nodemailer': ^6.4.5
@@ -27,6 +28,7 @@ dependencies:
   '@discordjs/builders': 1.1.0
   '@discordjs/collection': 1.0.1
   '@discordjs/rest': 1.0.1
+  '@sapphire/stopwatch': 1.4.1
   '@types/ms': 0.7.31
   '@types/node': 18.7.3
   '@types/nodemailer': 6.4.5
@@ -156,6 +158,13 @@ packages:
   /@sapphire/snowflake/3.2.2:
     resolution: {integrity: sha512-ula2O0kpSZtX9rKXNeQMrHwNd7E4jPDJYUXmEGTFdMRfyfMw+FPyh04oKMjAiDuOi64bYgVkOV3MjK+loImFhQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    dev: false
+
+  /@sapphire/stopwatch/1.4.1:
+    resolution: {integrity: sha512-FoZIM7oQ1kwkjWpl/rKReuDFSlkCDjDp//1Np2mmQD+xQ2Zyo/J2MaYAITprwQr3AUBu/OOUJvqm7f8lA9R7gA==}
+    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    dependencies:
+      tslib: 2.4.0
     dev: false
 
   /@tokenizer/token/0.3.0:
