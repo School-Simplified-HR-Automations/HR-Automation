@@ -21,4 +21,20 @@ interface Team {
     DepartmentId: number
 }
 
-export { Position, Department, Team }
+interface StaffFile {
+    id: number,
+    name: string,
+    personalEmail: string,
+    companyEmail: string,
+    createdAt: any,
+    updatedAt: any,
+    TeamId: number,
+    DepartmentId: number,
+    PositionId: number
+}
+
+interface StaffFileArray extends Array<StaffFile> {
+
+}
+
+export { Position, Department, Team, StaffFile }

@@ -127,7 +127,7 @@ Supervisor.belongsTo(StaffFile)
 StaffFile.hasOne(Supervisor)
 
 Supervisor.hasMany(Team)
-Team.belongsTo(Supervisor)
+Team.belongsToMany(Supervisor, { through: "TeamSupervisor" })
 
 // StaffFile Associations
 StaffFile.hasOne(DiscordInformation)
