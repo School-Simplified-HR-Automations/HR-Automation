@@ -183,7 +183,6 @@ for (const file of commandFiles) {
 
 client.once('ready', async () => {
     log.success('Ready!');
-    dbSql.sync()
 });
 
 
