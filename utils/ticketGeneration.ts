@@ -7,31 +7,41 @@
  * @returns A Nodemailer mail options object.
  */
 
-export default function ticketGeneration(text: string, author: string, category: string = "geninq", priority: number = 0, self?: boolean) {
-    const frame = "------------------------------------------"
-    let ctgText = ""
-    switch (category) {
-        case "bot":
-            ctgText = "Bot Inquiry"
-            break;
-        case "database":
-            ctgText = "Database Inquiry"
-            break;
-        case "bug-report":
-            ctgText = "Bug Report"
-            break;
-        default:
-            ctgText = "General Inquiry"
-    }
-    let subject = ""
-    let pvalue
-    if (!priority) pvalue = 0; else pvalue = priority
-    if (priority && priority > 3) subject = `URGENT: ${ctgText} - ${author}`; else subject = `${ctgText} - ${author}`
-    return {
-from: `${process.env.USER}`,
-to: `(${ !self ? `${process.env.REC1}, ${process.env.REC2}` : `${author}`})`,
-subject: `${subject}`,
-text: (`${!self ? `Hello,
+export default function ticketGeneration(
+  text: string,
+  author: string,
+  category: string = "geninq",
+  priority: number = 0,
+  self?: boolean
+) {
+  const frame = "------------------------------------------";
+  let ctgText = "";
+  switch (category) {
+    case "bot":
+      ctgText = "Bot Inquiry";
+      break;
+    case "database":
+      ctgText = "Database Inquiry";
+      break;
+    case "bug-report":
+      ctgText = "Bug Report";
+      break;
+    default:
+      ctgText = "General Inquiry";
+  }
+  let subject = "";
+  let pvalue;
+  if (!priority) pvalue = 0;
+  else pvalue = priority;
+  if (priority && priority > 3) subject = `URGENT: ${ctgText} - ${author}`;
+  else subject = `${ctgText} - ${author}`;
+  return {
+    from: `${process.env.USER}`,
+    to: `(${!self ? `${process.env.REC1}, ${process.env.REC2}` : `${author}`})`,
+    subject: `${subject}`,
+    text: `${
+      !self
+        ? `Hello,
 A new Support Ticket has been opened at ${new Date()}. The details are attached:
 ${frame}
 Category: ${ctgText}
@@ -39,7 +49,8 @@ Author: ${author}
 Priority: ${pvalue}
 Attached Message:
 ${text}
-${frame}`: `Hello,
+${frame}`
+        : `Hello,
 
 Your ticket has been received and processed by our staff team.
 Your ticket reference number is 
@@ -58,6 +69,7 @@ Your ticket details:
 | Priority: ${pvalue}
 
 Ticket Comments:
-${text}`}`)
-    }
+${text}`
+    }`,
+  };
 }
