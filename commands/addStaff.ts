@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, Embed, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import Query from "../routes/query";
 import StaffFileQueryRoutes from "../routes/StaffFileQueryRoutes";
 
 module.exports = {
@@ -25,7 +26,7 @@ module.exports = {
             embeds: [new EmbedBuilder().setTitle("Please wait...").setColor("Blue")]
         })
         if (team) {
-            await new StaffFileQueryRoutes().createStaffFile(`${fullname}`, 'Active', `${department}`, `${position}`, `${email}`, `${team}`)
+            await new Query().staff.createStaffFile(`${fullname}`, 'Active', `${department}`, `${position}`, `${email}`, `${team}`)
             .then(async () => {
                 if (supervisor) {
                     await new StaffFileQueryRoutes().assignSupervisor(`${fullname}`, `${position}`)
