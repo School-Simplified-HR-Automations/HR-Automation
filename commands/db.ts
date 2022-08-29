@@ -11,6 +11,7 @@ module.exports = {
     .addStringOption(opt => opt.setName("query").setDescription("Query to run.").setRequired(true))
     .addStringOption(opt => opt.setName("type").setDescription("Query type.").setChoices({ name: "Select", value: "select"}, { name: "Insert", value: "insert" }, { name: "Update", value: "update" })),
     async execute(interaction: ChatInputCommandInteraction) {
+        if (interaction.user.id !== "413462464022446084") return
         let error = {
             status: false,
             error: null

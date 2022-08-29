@@ -8,6 +8,8 @@ import { log } from "./utils/logger";
 import deploy from "./appcommands/deploy";
 import { DataTypes, Sequelize } from "sequelize"
 import { isTypeLiteralNode } from "typescript";
+import { now } from "moment";
+import { Stopwatch } from "@sapphire/stopwatch";
 const sequelize = require("sequelize")
 /**
  * Note: the periodic @ts-ignore's are remedies to a persistent issue with d.js. Short answer - some things aren't very well received by the library.
@@ -34,8 +36,7 @@ const dbSql = new Sequelize('mysql://tyler:HR-AZURE-3719-AEcF@hr-automations.db.
 const Team = dbSql.define('Team', {
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     }
 })
 const Supervisor = dbSql.define("Supervisor", {
@@ -63,6 +64,54 @@ const StaffFile = dbSql.define('StaffFile', {
             is: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
         },
         allowNull: true
+    },
+    photoLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    legalSex: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    genderIdentity: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    ethnicity: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    appStatus: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    strikes: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    censures: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    pips: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    activityStatus: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    alumni: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
 })
 const PositionHistory = dbSql.define("PositionHistory", {
@@ -118,6 +167,78 @@ const Department = dbSql.define('Department', {
         unique: true
     }
 })
+const StrikeHistory = dbSql.define('StrikeHistory', {
+    details: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    dateGiven: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    administrator: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    evidenceLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+})
+const CensureHistory = dbSql.define('CensureHistory', {
+    details: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    dateGiven: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    administrator: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    evidenceLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+})
+const PIPHistory = dbSql.define('PIPHistory', {
+    details: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    dateGiven: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    administrator: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    evidenceLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+})
+const BreakRecord = dbSql.define('BreakRecord', {
+    dateFrom: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    dateTo: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    reason: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    approval: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+})
 
 // Supervisor Associations
 Supervisor.hasMany(Department)
@@ -135,6 +256,18 @@ DiscordInformation.belongsTo(StaffFile)
 
 StaffFile.hasMany(PositionHistory)
 PositionHistory.belongsTo(StaffFile)
+
+StaffFile.hasMany(StrikeHistory)
+StrikeHistory.belongsTo(StaffFile)
+
+StaffFile.hasMany(CensureHistory),
+CensureHistory.belongsTo(StaffFile)
+
+StaffFile.hasMany(PIPHistory)
+PIPHistory.belongsTo(StaffFile)
+
+StaffFile.hasMany(BreakRecord)
+BreakRecord.belongsTo(StaffFile)
 
 StaffFile.belongsTo(Team)
 Team.hasMany(StaffFile)
@@ -182,7 +315,8 @@ for (const file of commandFiles) {
 
 
 client.once('ready', async () => {
-    log.success('Ready!');
+    const sw = new Stopwatch().start()
+    log.success(`Readied in ${sw.stop().toString()}!`);
 });
 
 

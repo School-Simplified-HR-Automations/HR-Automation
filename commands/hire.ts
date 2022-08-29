@@ -45,75 +45,61 @@ module.exports = {
         })
       }
     }
+    
     if (team) {
       const fn = interaction.options.getString("firstname")
       const ln = interaction.options.getString("lastname")
+      const concatname = `${fn} ${ln}`
       const dpt = interaction.options.getString("department")
       const em = interaction.options.getString("email")
       const pos = interaction.options.getString("position")
 
       await dbSql.query(`INSERT INTO stafffiles (
-                name, personalEmail, DepartmentId, 
-                TeamId, PositionId, createdAt, updatedAt
-              ) 
-              VALUES 
-                (
-                  '${fn} ${ln}', '${em}', ${deptres[0]["id"]}, 
-                  ${teamres[0]["id"]}, ${posres[0]["id"]}, 
-                  now(), now()
-                );
-              INSERT INTO positionhistories (
-                title, dept, team, joined, quit, StaffFileId, 
-                DepartmentId, createdAt, updatedAt, 
-                PositionId
-              ) 
-              VALUES 
-                (
-                  '${posres[0]["title"]}', 
-                  '${deptres[0]["name"]}', 
-                  '${teamres[0]["name"]}', 
-                  now(), 
-                  null, 
-                  (
-                    SELECT 
-                      id 
-                    FROM 
-                      stafffiles 
-                    WHERE 
-                      name = '${fn} ${ln}' 
-                    LIMIT 
-                      1
-                  ), (
-                    SELECT 
-                      id 
-                    FROM 
-                      departments 
-                    WHERE 
-                      name = '${dpt}' 
-                    LIMIT 
-                      1
-                  ), now(), 
-                  now(), 
-                  ${posres[0]["id"]}
-                );
-              INSERT INTO positionstaff (
-                StaffFileId, PositionId, createdAt, 
-                updatedAt
-              ) 
-              VALUES 
-                (
-                  (
-                    SELECT 
-                      id 
-                    FROM 
-                      stafffiles 
-                    WHERE 
-                      name = '${fn} ${ln}'
-                  ), 
-                  ${posres[0]["id"]}, 
-                  now(), 
-                  now()
-                )
+        id, name, personalEmail, companyEmail, 
+        photoLink, phone, legalSex, genderIdentity, 
+        ethnicity, appStatus, strikes, censures, 
+        pips, activityStatus, alumni, createdAt, 
+        updatedAt, TeamId, DepartmentId, 
+        PositionId
+      ) 
+      VALUES 
+        (
+          2, '${concatname}', null, '${em}', 
+          null, null, null, null, null, 'Accepted / Trainee', 
+          0, 0, 0, 'Onboarding', false, now(), 
+          now(), ${teamres[0].id}, ${deptres[0].id}, ${posres[0].id}
+        );
+      SET @staffid = (SELECT id FROM stafffiles WHERE name = '${concatname}');
+      INSERT INTO positionhistories (
+        id, title, dept, team, joined, quit, 
+        createdAt, updatedAt, StaffFileId, 
+        PositionId, DepartmentId
+      ) 
+      VALUES 
+        (
+          2001, 
+          'Senior Vice President of Human Resources', 
+          'Human Resources', 
+          'Corporate', 
+          now(), 
+          null, 
+          now(), 
+          now(), 
+          @staffid, 
+          ${posres[0].id}, 
+          ${deptres[0].id}
+        );
+      INSERT INTO positionstaff (
+        createdAt, updatedAt, StaffFileId, 
+        PositionId
+      ) 
+      VALUES 
+        (
+          now(), 
+          now(), 
+          @staffid, 
+          ${posres[0].id}
+        )
               `).catch(err => {
         console.log(err)
         return interaction.editReply({
