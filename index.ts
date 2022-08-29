@@ -257,11 +257,11 @@ const Tickets = dbSql.define('Tickets', {
         allowNull: false
     },
     openDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false
     },
     closeDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true
     }
 })
