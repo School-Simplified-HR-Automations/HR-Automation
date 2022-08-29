@@ -1,4 +1,4 @@
-import { QueryTypes } from "sequelize/types";
+import { QueryTypes } from "sequelize";
 import { dbSql } from "..";
 
 export default class TicketPanelQueryRoutes {
