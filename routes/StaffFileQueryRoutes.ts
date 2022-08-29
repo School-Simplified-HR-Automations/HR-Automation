@@ -79,11 +79,21 @@ export default class StaffFileQueryRoutes {
     async getPositionByStaffPosition(staff: object): Promise<object> {
         return dbSql.query(`SELECT * FROM positions WHERE id = (SELECT PositionId FROM stafffiles WHERE id = ${(staff as StaffFile).id})`)
     }
-
-    async createStaffFile(fullName: string, activityStatus: "Active" | "On Break" | "Resigned" | "Fired" | "Blacklisted", departmentName: string, positionName: string, email: string, teamName?: string, appStatus?: "Awaiting Review" | "Rejected" | "Awaiting Response" | "Awaiting Onboarding" | "Awaiting Server Entry" | "Onboarding Phase"): Promise<object> {
+    /**
+     * Initializes a Staff File, Position History, and Position Staff link entry with all required staff details.
+     * @param fullName The first and last name of the user.
+     * @param activityStatus Choose from a list of valid activity statuses.
+     * @param departmentName The department the user is joining.
+     * @param positionName The position the user is being onboarded in.
+     * @param email The company email of the user.
+     * @param teamName Optional, the name of the team being joined.
+     * @param appStatus Optional, the updated application status of the user.
+     * @returns New Staff File, Position History, and Position Staff entries.
+     */
+    async createStaffFile(fullName: string, activityStatus: "Active" | "On Break" | "Resigned" | "Fired" | "Blacklisted", departmentName: string, positionName: string, email: string, teamName?: string, appStatus?: "Awaiting Review" | "Rejected" | "Awaiting Response" | "Awaiting Onboarding" | "Awaiting Server Entry" | "Onboarding Phase"): Promise<void> {
         if (appStatus) {
             if (teamName) {
-                return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+                dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
@@ -105,8 +115,9 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+                return
             } else {
-                return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+                dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 INSERT INTO stafffiles (
                     name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
@@ -127,10 +138,11 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+                return
             }
         } else {
             if (teamName) {
-                return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+                dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
@@ -152,8 +164,9 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+                return
             } else {
-                return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+                dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 INSERT INTO stafffiles (
                     name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
@@ -174,14 +187,21 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+                return
             }
         }
     }
-
-    async assignSupervisor(fullName: string, title: string) {
-        return dbSql.query(`UPDATE supervisors
+    /**
+     * Assigns a designated, existing user as a Supervisor.
+     * @param fullName The full name of the user.
+     * @param title The title of the user. This position must be assigned as a Supervisor role or this will have no effect.
+     * @returns Updated Supervisor entry.
+     */
+    async assignSupervisor(fullName: string, title: string): Promise<void> {
+        dbSql.query(`UPDATE supervisors
         SET StaffFileId = (SELECT id FROM stafffiles WHERE name = '${fullName}')
         WHERE title = '${title}'`)
+        return
     }
 
 }
