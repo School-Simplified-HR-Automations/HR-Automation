@@ -300,7 +300,7 @@ const TicketPanels = dbSql.define('TicketPanels', {
     },
     category: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     logChannel: {
         type: DataTypes.STRING,
