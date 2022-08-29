@@ -11,11 +11,12 @@ assignees: ''
 
 **What problem does this feature solve?**
 
-**Describe the necessary implementations.**
-__Front-End (Bot)__
+**Describe the necessary implementation summary, and specific implementations under each sub-heading.**
+
+<ins>Front-End (Bot)</ins>
 
 
-__Back-End (DB)__
+<ins>Back-End (DB)</ins>
 
 **Additional context**
 
