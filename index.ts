@@ -239,6 +239,74 @@ const BreakRecord = dbSql.define('BreakRecord', {
         allowNull: false
     }
 })
+const Tickets = dbSql.define('Tickets', {
+    channelId: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    authorId: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    paneltpguid: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    openDate: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    closeDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
+})
+const TicketPanels = dbSql.define('TicketPanels', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    value: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    channelPrefix: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    guildId: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    buttonName: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    tpguid: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    messageLink: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    category: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    logChannel: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+})
 
 // Supervisor Associations
 Supervisor.hasMany(Department)
