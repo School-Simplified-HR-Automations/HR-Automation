@@ -8,6 +8,11 @@ import { DataTypes, Sequelize } from "sequelize"
 import { Stopwatch } from "@sapphire/stopwatch"
 import { BootCheck } from "./utils/bootCheck"
 import { Security } from "./services/security"
+import express from "express"
+import cors from "cors"
+import helmet from "helmet"
+import bodyParser from "body-parser"
+import morgan from "morgan"
 
 BootCheck.check()
 
@@ -396,6 +401,29 @@ declare module "discord.js" {
 		textCommands: Collection<unknown, any>
 	}
 }
+
+const app = express()
+
+const src = [
+	{
+		title: "SS HR API",
+		author: "SS HR",
+		version: "v0.0.1"
+	}
+]
+
+app.use(helmet())
+app.use(bodyParser.json())
+app.use(cors())
+app.use(morgan('combined'))
+
+app.get('/', (req: any, res: any) => {
+	res.send(src)
+})
+
+app.listen(3000, () => {
+	console.log("Server started on port 3000")
+})
 
 client.once("ready", async () => {
 	const sw = new Stopwatch().start()
