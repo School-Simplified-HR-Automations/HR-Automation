@@ -11,6 +11,11 @@ import { isTypeLiteralNode } from "typescript";
 import { now } from "moment";
 import { Stopwatch } from "@sapphire/stopwatch";
 const sequelize = require("sequelize")
+import express from "express"
+import bodyParser from "body-parser"
+import cors from "cors"
+import helmet from "helmet"
+import morgan from "morgan"
 /**
  * Note: the periodic @ts-ignore's are remedies to a persistent issue with d.js. Short answer - some things aren't very well received by the library.
  * Long answer - something to do with modules and declarations and subclasses and such. In a word, if it causes issues, see me personally.
@@ -364,7 +369,13 @@ PositionHistory.belongsTo(Department)
 Position.belongsTo(Department)
 Department.hasMany(Position)
 
-
+const app = express()
+const src = [
+    {
+        author: "SS Human Resources Automation",
+        version: "v.0.0.1"
+    }
+]
 
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildMessages] });
 // @ts-ignore
@@ -383,6 +394,9 @@ for (const file of commandFiles) {
 
 
 client.once('ready', async () => {
+    app.listen(3000, () => {
+        console.log('API - Listening on port 3000.')
+    })
     const sw = new Stopwatch().start()
     log.success(`Readied in ${sw.stop().toString()}!`);
 });
@@ -404,6 +418,14 @@ client.on('interactionCreate', async (interaction: Interaction) => {
         }
     }
 });
+app.use(helmet())
+app.use(bodyParser.json())
+app.use(cors())
+app.use(morgan('combined'))
+
+app.get('/', (req: any, res: any) => {
+    res.send(src)
+})
 
 deploy()
 client.login(process.env.TOKEN);
