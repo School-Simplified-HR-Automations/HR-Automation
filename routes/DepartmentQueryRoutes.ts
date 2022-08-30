@@ -1,5 +1,6 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
+import { Department } from "../types/common/ReturnTypes"
 import queryBuilder from "../utils/queryBuilder"
 
 export default class DepartmentQueryRoutes {
@@ -7,7 +8,7 @@ export default class DepartmentQueryRoutes {
         id?: number,
         SupervisorId?: number,
         name?: string
-    }): Promise<object> {
+    }): Promise<Department> {
         let idquery: string | null
         let supervisorquery: string | null
         let namequery: string | null
@@ -25,6 +26,6 @@ export default class DepartmentQueryRoutes {
             filters.push(namequery)
         } else namequery = null
         const querystr = queryBuilder('SELECT * FROM departments', filters, 1)
-        return dbSql.query(querystr, { type: QueryTypes.SELECT })
+        return (await dbSql.query(querystr, { type: QueryTypes.SELECT }))[0] as Department
     }
 }
