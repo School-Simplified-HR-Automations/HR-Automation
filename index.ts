@@ -5,15 +5,6 @@ import path from "path"
 require("dotenv").config()
 import { log } from "./services/logger"
 import { DataTypes, Sequelize } from "sequelize"
-import { isTypeLiteralNode } from "typescript";
-import { now } from "moment";
-import { Stopwatch } from "@sapphire/stopwatch";
-const sequelize = require("sequelize")
-import express from "express"
-import bodyParser from "body-parser"
-import cors from "cors"
-import helmet from "helmet"
-import morgan from "morgan"
 import { Stopwatch } from "@sapphire/stopwatch"
 import { BootCheck } from "./utils/bootCheck"
 import { Security } from "./services/security"
@@ -365,14 +356,6 @@ PositionHistory.belongsTo(Department)
 Position.belongsTo(Department)
 Department.hasMany(Position)
 
-const app = express()
-const src = [
-    {
-        author: "SS Human Resources Automation",
-        version: "v.0.0.1"
-    }
-]
-
 const client: Client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -407,20 +390,17 @@ for (const file of textCommandFiles) {
 	client.textCommands.set(command.name, command)
 }
 
-client.once('ready', async () => {
-    app.listen(3000, () => {
-        console.log('API - Listening on port 3000.')
-    })
-    const sw = new Stopwatch().start()
-    log.success(`Readied in ${sw.stop().toString()}!`);
-});
-
 declare module "discord.js" {
 	export interface Client {
 		commands: Collection<unknown, any>
 		textCommands: Collection<unknown, any>
 	}
 }
+
+client.once("ready", async () => {
+	const sw = new Stopwatch().start()
+	log.success(`Readied in ${sw.stop().toString()}!`)
+})
 
 client.on("interactionCreate", async (interaction: Interaction) => {
 	if (
@@ -445,22 +425,6 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 		}
 	}
 })
-
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-        }
-    }
-});
-app.use(helmet())
-app.use(bodyParser.json())
-app.use(cors())
-app.use(morgan('combined'))
-
-app.get('/', (req: any, res: any) => {
-    res.send(src)
 
 client.on("messageCreate", async (message: Message) => {
 	const prefix = process.env.DEV_PREFIX as string
