@@ -1,6 +1,6 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
-import { StaffFile } from "../types/common/ReturnTypes"
+import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
 
 /**
  * Provides easy accessible query routes for the "stafffiles" table of the database.
@@ -28,7 +28,7 @@ export default class StaffFileQueryRoutes {
 	 * @param name The logged name to query. Must be first name.
 	 * @returns Array of Staff File Objects
 	 */
-	async getStaffByFirstName(name: string): Promise<object[]> {
+	async getStaffByFirstName(name: string): Promise<StaffFile[]> {
 		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '${name} %'`, {
 			type: QueryTypes.SELECT,
 		})
@@ -38,7 +38,7 @@ export default class StaffFileQueryRoutes {
 	 * @param name The logged name to query. Must be last name.
 	 * @returns Array of Staff File Objects
 	 */
-	async getStaffByLastName(name: string): Promise<object[]> {
+	async getStaffByLastName(name: string): Promise<StaffFile[]> {
 		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '%${name}'`, {
 			type: QueryTypes.SELECT,
 		})
@@ -48,12 +48,12 @@ export default class StaffFileQueryRoutes {
 	 * @param id Unique Primary Key.
 	 * @returns Staff File Object
 	 */
-	async getStaffById(id: number): Promise<object> {
+	async getStaffById(id: number): Promise<StaffFile> {
 		return (
 			await dbSql.query(`SELECT * FROM stafffiles WHERE id = ${id}`, {
 				type: QueryTypes.SELECT,
 			})
-		)[0]
+		)[0] as StaffFile
 	}
 	/**
 	 * Queries for a staff member by their personal or company email. Returns an array of StaffFiles which can be handled, iterated, etc.
@@ -64,7 +64,7 @@ export default class StaffFileQueryRoutes {
 	async getStaffByEmail(
 		email: string,
 		type: "Personal" | "Company"
-	): Promise<object[]> {
+	): Promise<StaffFile[]> {
 		if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/))
 			throw new Error(
 				"getStaffByEmail - email parameter must be an email address."
@@ -85,36 +85,32 @@ export default class StaffFileQueryRoutes {
 	 * @param staff The Staff File to use.
 	 * @returns Team Object.
 	 */
-	async getTeamByStaffTeam(staff: object): Promise<object> {
-		return dbSql.query(
+	async getTeamByStaffTeam(staff: object): Promise<Team> {
+		return (await dbSql.query(
 			`SELECT * FROM teams WHERE id = (SELECT TeamId FROM stafffiles WHERE id = ${
 				(staff as StaffFile).id
-			})`
-		) // TODO
+			})`,
+			{ type: QueryTypes.SELECT }))[0] as Team // TODO
 	}
 	/**
 	 * Queries for a staff department via an intermediate Staff File. Returns the Department file.
 	 * @param staff The Staff File to use.
 	 * @returns Department Object.
 	 */
-	async getDepartmentByStaffDepartment(staff: object): Promise<object> {
-		return dbSql.query(
-			`SELECT * FROM departments WHERE id = (SELECT DepartmentId FROM stafffiles WHERE id = ${
-				(staff as StaffFile).id
-			})`
-		)
+	async getDepartmentByStaffDepartment(staff: object): Promise<Department> {
+		return (await dbSql.query(`SELECT * FROM departments WHERE id = (SELECT DepartmentId FROM stafffiles WHERE id = ${(staff as StaffFile).id})`, { type: QueryTypes.SELECT }))[0] as Department
 	}
 	/**
 	 * Queries for a staff position via an intermediate Staff File. Returns the Position file.
 	 * @param staff The Staff File to use.
 	 * @returns Position Object.
 	 */
-	async getPositionByStaffPosition(staff: object): Promise<object> {
-		return dbSql.query(
+	async getPositionByStaffPosition(staff: object): Promise<Position> {
+		return (await dbSql.query(
 			`SELECT * FROM positions WHERE id = (SELECT PositionId FROM stafffiles WHERE id = ${
 				(staff as StaffFile).id
-			})`
-		)
+			})`,
+		{ type: QueryTypes.SELECT }))[0] as Position
 	}
 
 	async createStaffFile(
@@ -136,10 +132,10 @@ export default class StaffFileQueryRoutes {
 			| "Awaiting Onboarding"
 			| "Awaiting Server Entry"
 			| "Onboarding Phase"
-	): Promise<object> {
+	): Promise<void> {
 		if (appStatus) {
 			if (teamName) {
-				return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
@@ -161,8 +157,9 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+				return
 			} else {
-				return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 INSERT INTO stafffiles (
                     name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
@@ -183,10 +180,11 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+				return
 			}
 		} else {
 			if (teamName) {
-				return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
@@ -208,8 +206,9 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+				return
 			} else {
-				return dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
+				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 INSERT INTO stafffiles (
                     name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
@@ -230,13 +229,15 @@ export default class StaffFileQueryRoutes {
                 VALUES (
                     now(), now(), @staffid, @positionid
                 )`)
+				return
 			}
 		}
 	}
 
-	async assignSupervisor(fullName: string, title: string) {
-		return dbSql.query(`UPDATE supervisors
+	async assignSupervisor(fullName: string, title: string): Promise<void> {
+		dbSql.query(`UPDATE supervisors
         SET StaffFileId = (SELECT id FROM stafffiles WHERE name = '${fullName}')
         WHERE title = '${title}'`)
+		return
 	}
 }
