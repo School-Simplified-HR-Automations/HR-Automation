@@ -13,6 +13,7 @@ import cors from "cors"
 import helmet from "helmet"
 import bodyParser from "body-parser"
 import morgan from "morgan"
+import Query from "./routes/query"
 
 BootCheck.check()
 
@@ -414,11 +415,22 @@ const src = [
 
 app.use(helmet())
 app.use(bodyParser.json())
-app.use(cors())
+app.use(cors({
+	origin: "*"
+}))
 app.use(morgan('combined'))
+app.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "YOUR-DOMAIN.TLD"); // update to match the domain you will make the request from
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+  });
 
 app.get('/', (req: any, res: any) => {
 	res.send(src)
+})
+
+app.get('/test/', async (req: any, res: any) => {
+	res.send(await new Query().staff.getStaffByFirstName('Tyler'))
 })
 
 app.listen(3000, () => {
