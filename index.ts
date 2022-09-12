@@ -405,13 +405,7 @@ declare module "discord.js" {
 
 const app = express()
 
-const src = [
-	{
-		title: "SS HR API",
-		author: "SS HR",
-		version: "v0.0.1"
-	}
-]
+
 
 app.use(helmet())
 app.use(bodyParser.json())
@@ -419,15 +413,14 @@ app.use(cors({
 	origin: "*"
 }))
 app.use(morgan('combined'))
+/**app.all('*', function(req: any, res: any, next: any) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	res.header('Access-Control-Allow-Headers', 'Content-Type');
+	next();
+});*/
 
 
-app.get('/', (req: any, res: any) => {
-	res.send(src)
-})
-
-app.get('/test/', async (req: any, res: any) => {
-	res.send(await new Query().staff.getStaffByFirstName('Tyler'))
-})
 
 app.listen(3000, () => {
 	console.log("Server started on port 3000")
@@ -520,4 +513,5 @@ export {
 	StaffFile,
 	Supervisor,
 	Team,
+	app
 }

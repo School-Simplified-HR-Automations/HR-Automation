@@ -1,0 +1,15 @@
+swagger: '2.0'
+basePath: '/v1'
+info:
+  title: 'School Simplfied's Provisional API.'
+  version: '1.0.0'
+definitions:
+  Staff:
+    type: 'object'
+    properties:
+      name:
+        description: 'Full name of the staff member.'
+        type: 'string'
+      required:
+      - 'name'
+paths: {}
