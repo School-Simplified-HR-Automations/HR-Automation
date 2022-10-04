@@ -500,6 +500,47 @@ client.on("messageCreate", async (message: Message) => {
 		}
 	}
 })
+const src = [
+	{
+		title: "SS HR API",
+		author: "SS HR",
+		version: "v0.0.1"
+	}
+]
+
+app.get('/', (req: any, res: any) => {
+	res.send(src)
+})
+
+app.get('/users/firstname/:firstname', async (req: any, res: any) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(await Query.staff.getStaffByFirstName(`${req.params.firstname}`))
+})
+
+app.get('/users/lastname/:lastname', async (req: any, res: any) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(await Query.staff.getStaffByLastName(`${req.params.lastname}`))
+})
+
+app.get('/users/id', async (req: any, res: any) => {
+	let id = parseInt(req.query.id)
+	if (isNaN(id)) res.send({
+		status: 400,
+		message: "Invalid ID"
+	})
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send(await Query.staff.getStaffById(id))
+
+})
+
+app.get('/users/email', async (req: any, res: any) => {
+	try {
+		res.header("Access-Control-Allow-Origin", "*");
+		res.send(await Query.staff.getStaffByEmail(`${req.query.email}`, 'Company'))
+	} catch {
+
+	}
+})
 
 client.login(process.env.TOKEN)
 
