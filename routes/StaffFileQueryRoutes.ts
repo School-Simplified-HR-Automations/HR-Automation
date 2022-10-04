@@ -29,7 +29,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Array of Staff File Objects
 	 */
 	async getStaffByFirstName(name: string): Promise<StaffFile[]> {
-		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '${name} %'`, {
+		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '${name}%'`, {
 			type: QueryTypes.SELECT,
 		})
 	}

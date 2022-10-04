@@ -6,10 +6,10 @@ import TicketPanelQueryRoutes from "./TicketPanelQueryRoutes";
 import TicketQueryRoutes from "./TicketQueryRoutes";
 
 export default class Query {
-    staff = new StaffFileQueryRoutes()
-    tickets = new TicketQueryRoutes()
-    panels = new TicketPanelQueryRoutes()
-    positions = new PositionQueryRoutes()
-    departments = new DepartmentQueryRoutes()
-    teams = new TeamQueryRoutes()
+    static staff = new StaffFileQueryRoutes()
+    static tickets = new TicketQueryRoutes()
+    static panels = new TicketPanelQueryRoutes()
+    static positions = new PositionQueryRoutes()
+    static departments = new DepartmentQueryRoutes()
+    static teams = new TeamQueryRoutes()
 }
