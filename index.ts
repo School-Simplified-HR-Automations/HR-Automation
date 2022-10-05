@@ -1,5 +1,5 @@
 import { Collection } from "@discordjs/collection"
-import { Interaction, Client, GatewayIntentBits, Message } from "discord.js"
+import { Interaction, Client, GatewayIntentBits, Message, Partials } from "discord.js"
 import fs from "fs"
 import path from "path"
 require("dotenv").config()
@@ -14,6 +14,7 @@ import helmet from "helmet"
 import bodyParser from "body-parser"
 import morgan from "morgan"
 import Query from "./routes/query"
+import deploy from "./appcommands/deploy"
 
 BootCheck.check()
 
@@ -112,6 +113,11 @@ const StaffFile = dbSql.define("StaffFile", {
 		allowNull: false,
 		defaultValue: false,
 	},
+	outOfOffice: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
+	}
 })
 const PositionHistory = dbSql.define("PositionHistory", {
 	title: {
@@ -307,6 +313,33 @@ const TicketPanels = dbSql.define("TicketPanels", {
 	},
 })
 
+const Messages = dbSql.define("messages", {
+	authoruser: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	authorid: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageChannelId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageServerId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	time: {
+		type: DataTypes.DATE,
+		allowNull: false
+	}
+})
+
 // Supervisor Associations
 Supervisor.hasMany(Department)
 Department.belongsTo(Supervisor)
@@ -316,6 +349,12 @@ StaffFile.hasOne(Supervisor)
 
 Supervisor.hasMany(Team)
 Team.belongsToMany(Supervisor, { through: "TeamSupervisor" })
+
+Supervisor.hasMany(Position)
+Position.belongsTo(Supervisor)
+
+Team.hasMany(Position)
+Position.belongsTo(Team)
 
 // StaffFile Associations
 StaffFile.hasOne(DiscordInformation)
@@ -346,6 +385,9 @@ StaffFile.belongsToMany(Position, {
 	through: "PositionStaff",
 })
 
+StaffFile.hasMany(Messages)
+Messages.belongsTo(StaffFile)
+
 // Team Associations
 
 Team.belongsTo(Department)
@@ -362,6 +404,8 @@ PositionHistory.belongsTo(Department)
 Position.belongsTo(Department)
 Department.hasMany(Position)
 
+
+
 const client: Client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -370,6 +414,7 @@ const client: Client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 	],
+	partials: [Partials.Channel]
 })
 // @ts-ignore
 client.commands = new Collection()
@@ -428,6 +473,7 @@ app.listen(3000, () => {
 
 client.once("ready", async () => {
 	const sw = new Stopwatch().start()
+	deploy()
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
 
@@ -451,6 +497,23 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 			interaction.reply(
 				`An error occured while executing the command.\n\nError ID: ${ID}`
 			)
+		}
+	}
+})
+
+client.on("messageCreate", async (message: Message) => {
+	if (message.mentions.members?.first()) {
+		let memberArr: string[] = [];
+		message.mentions.members.forEach(member => memberArr.push(member.user.id))
+		for (let i = 0; i < memberArr.length; i++) {
+			const leave = await Query.staff.onLeave(memberArr[i])
+			if (leave) {
+				const guildId = message.guild?.id
+				const channelId = message.channel.id
+				dbSql.query(`INSERT INTO messages
+				(authoruser, authorid, messageid, messageChannelId, messageServerId, time, createdAt, updatedAt, StaffFileId)
+				VALUES ('${message.member?.displayName}', '${message.member?.id}', '${message.id}', '${channelId}', '${guildId}', now(), now(), now(), (SELECT StaffFileId FROM discordinfos WHERE discordId='${memberArr[i]}'))`)
+			}
 		}
 	}
 })

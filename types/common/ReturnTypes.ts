@@ -26,13 +26,36 @@ interface StaffFile {
 	name: string
 	personalEmail: string
 	companyEmail: string
+	photoLink: string
+	phone: number
+	legalSex: string
+	genderIdentity: string
+	ethnicity: string
+	appStatus: string
+	strikes: number
+	censures: number
+	pips: number
+	activityStatus: string
+	alumni: boolean
 	createdAt: any
 	updatedAt: any
 	TeamId: number
 	DepartmentId: number
 	PositionId: number
+	outOfOffice: boolean
+}
+
+interface MessageRecord {
+	id: number,
+	authoruser: string,
+	authorid: string,
+	messageId: string,
+	messageChannelId: string,
+	messageServerId: string,
+	time: string,
+	createdAt: string
 }
 
 interface StaffFileArray extends Array<StaffFile> {}
 
-export { Position, Department, Team, StaffFile }
+export { Position, Department, Team, StaffFile, MessageRecord }
