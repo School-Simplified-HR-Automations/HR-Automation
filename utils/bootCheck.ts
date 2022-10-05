@@ -1,5 +1,8 @@
 import { log } from "../services/logger"
-import "dotenv/config"
+import dotenv from "dotenv"
+dotenv.config({
+	path: "C:\\Users\\tm21c\\Desktop\\Code Projects\\SS HR Automation\\src\\.env"
+})
 
 export class BootCheck {
 	public static async check(): Promise<void> {

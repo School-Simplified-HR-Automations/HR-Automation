@@ -2,11 +2,10 @@
     "name": "sshrstaff",
     "version": "0.7.0-unstable",
     "description": "",
-    "main": "src/index.ts",
+    "main": "index.ts",
     "scripts": {
-        "build": "tsc && rd /s \"./dist/*\"",
-        "start": "ts-node ./src/index.ts",
-        "deploy": "ts-node ./src/deploy-commands"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "ts-node index.ts"
     },
     "keywords": [],
     "author": "",
