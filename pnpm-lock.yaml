@@ -20,6 +20,7 @@ specifiers:
   colorette: ^2.0.19
   cors: ^2.8.5
   discord.js: ^14.1.2
+  discordjs-button-embed-pagination: ^5.0.0
   dotenv: ^16.0.1
   express: ^4.18.1
   express-openapi: ^12.0.2
@@ -58,6 +59,7 @@ dependencies:
   colorette: 2.0.19
   cors: 2.8.5
   discord.js: 14.2.0
+  discordjs-button-embed-pagination: 5.0.0
   dotenv: 16.0.1
   express: 4.18.1
   express-openapi: 12.0.2
@@ -740,6 +742,15 @@ packages:
       tslib: 2.4.0
       undici: 5.8.2
       ws: 8.8.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: false
+
+  /discordjs-button-embed-pagination/5.0.0:
+    resolution: {integrity: sha512-aqZFKkrPVszcQAawUVs34DfIV7zLIn5EdSTXhsRoXuVfgT6z2KMk4lRWKXwSZC3B4yjiQ1hnphQogI1ZbdQgOQ==}
+    dependencies:
+      discord.js: 14.2.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
