@@ -5,7 +5,7 @@ import fs from "fs"
 import path from "path"
 require("dotenv").config()
 import { log } from "./services/logger"
-import { DataTypes, Sequelize } from "sequelize"
+import { DataTypes, NUMBER, Sequelize } from "sequelize"
 import { Stopwatch } from "@sapphire/stopwatch"
 import { BootCheck } from "./utils/bootCheck"
 import { Security } from "./services/security"
@@ -176,146 +176,6 @@ const Department = dbSql.define("Department", {
 		unique: true,
 	},
 })
-const StrikeHistory = dbSql.define("StrikeHistory", {
-	details: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	administrator: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
-})
-const CensureHistory = dbSql.define("CensureHistory", {
-	details: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	administrator: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
-})
-const PIPHistory = dbSql.define("PIPHistory", {
-	details: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	administrator: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
-})
-const BreakRecord = dbSql.define("BreakRecord", {
-	dateFrom: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	dateTo: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	reason: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	approval: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-})
-const Tickets = dbSql.define("Tickets", {
-	channelId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	authorId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	paneltpguid: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	status: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	openDate: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	closeDate: {
-		type: DataTypes.DATE,
-		allowNull: true,
-	},
-})
-const TicketPanels = dbSql.define("TicketPanels", {
-	name: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	value: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	description: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	channelPrefix: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	guildId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	buttonName: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	tpguid: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	messageLink: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	category: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	logChannel: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-})
 
 const Messages = dbSql.define("messages", {
 	authoruser: {
@@ -364,6 +224,53 @@ const APIAuths = dbSql.define("apiauths", {
 	}
 })
 
+const PositionInfo = dbSql.define("positioninfos", {
+	StaffFileId: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		unique: false
+	},
+	PositionId: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	TeamId: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	DepartmentId: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	}
+})
+
+const Record = dbSql.define("records", {
+	StaffFileRec: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	StaffFileAdm: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	date: {
+		type: DataTypes.DATE,
+		allowNull: false
+	},
+	dateExp: {
+		type: DataTypes.DATE,
+		allowNull: true
+	},
+	reason: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	detailLink: {
+		type: DataTypes.STRING,
+		allowNull: true
+	},
+})
+
 // Association Section
 
 // Supervisor Associations
@@ -389,37 +296,14 @@ DiscordInformation.belongsTo(StaffFile)
 StaffFile.hasMany(PositionHistory)
 PositionHistory.belongsTo(StaffFile)
 
-StaffFile.hasMany(StrikeHistory)
-StrikeHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(CensureHistory), CensureHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(PIPHistory)
-PIPHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(BreakRecord)
-BreakRecord.belongsTo(StaffFile)
+StaffFile.hasMany(Record)
+Record.belongsTo(StaffFile)
 
 StaffFile.belongsTo(Team)
 Team.hasMany(StaffFile)
 
 StaffFile.belongsTo(Department)
 Department.hasMany(StaffFile)
-
-Position.hasMany(StaffFile)
-StaffFile.belongsToMany(Position, {
-	through: "PositionStaff",
-})
-
-Department.hasMany(StaffFile)
-StaffFile.belongsToMany(Department, {
-	through: "DepartmentStaff"
-})
-
-Team.hasMany(StaffFile)
-StaffFile.belongsToMany(Team, {
-	through: "TeamStaff"
-})
 
 StaffFile.hasMany(Messages)
 Messages.belongsTo(StaffFile)
@@ -528,7 +412,7 @@ app.listen(3000, () => {
 // Optional deployment and once-ready handler
 
 client.once("ready", async () => {
-	// deploy()
+	deploy()
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
 
