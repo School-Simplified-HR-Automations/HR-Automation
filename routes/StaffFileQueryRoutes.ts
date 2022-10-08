@@ -41,7 +41,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Array of Staff File Objects
 	 */
 	async getStaffByLastName(name: string): Promise<StaffFile[]> {
-		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '%${name}'`, {
+		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '% ${name}%'`, {
 			type: QueryTypes.SELECT,
 		})
 	}
@@ -269,5 +269,10 @@ export default class StaffFileQueryRoutes {
 
 	async dropMessages(discordId: string) {
 		await dbSql.query(`DELETE FROM messages WHERE StaffFileId=(SELECT StaffFileId FROM discordinfos WHERE discordId=${discordId})`)
+	}
+
+	async getStaffBySupervisor(supervisorId: number) {
+		let ret: StaffFile = (await this.getStaffById((await Query.supervisors.getSupervisorById(supervisorId)).StaffFileId))
+		return ret
 	}
 }

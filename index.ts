@@ -1,5 +1,6 @@
+// Import Header
 import { Collection } from "@discordjs/collection"
-import { Interaction, Client, GatewayIntentBits, Message, Partials } from "discord.js"
+import { Interaction, Client, GatewayIntentBits, Message, Partials, EmbedBuilder } from "discord.js"
 import fs from "fs"
 import path from "path"
 require("dotenv").config()
@@ -16,10 +17,11 @@ import morgan from "morgan"
 import Query from "./routes/query"
 import deploy from "./appcommands/deploy"
 import clean from "./utils/clean"
+import { StaffFile as SF } from "./types/common/ReturnTypes"
 const sw = new Stopwatch().start()
 BootCheck.check()
 
-// Create a new client instance
+// Sequelize Client
 const dbSql = new Sequelize(process.env.SQL_URI as string, {
 	username: process.env.SQL_USERNAME,
 	password: process.env.SQL_PASSWORD,
@@ -32,7 +34,8 @@ const dbSql = new Sequelize(process.env.SQL_URI as string, {
 		multipleStatements: true,
 	},
 })
-// model declarations
+
+// Models
 
 const Team = dbSql.define("Team", {
 	name: {
@@ -341,6 +344,28 @@ const Messages = dbSql.define("messages", {
 	}
 })
 
+const APIAuths = dbSql.define("apiauths", {
+	authid: {
+		type: DataTypes.STRING,
+		allowNull: false,
+		unique: true
+	},
+	admin: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	backup: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	permit: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	}
+})
+
+// Association Section
+
 // Supervisor Associations
 Supervisor.hasMany(Department)
 Department.belongsTo(Supervisor)
@@ -387,7 +412,7 @@ StaffFile.belongsToMany(Position, {
 })
 
 Department.hasMany(StaffFile)
-StaffFile.belongsToMany(Department,  {
+StaffFile.belongsToMany(Department, {
 	through: "DepartmentStaff"
 })
 
@@ -415,9 +440,7 @@ PositionHistory.belongsTo(Department)
 Position.belongsTo(Department)
 Department.hasMany(Position)
 
-
-
-
+// Discord Client Declaration
 
 const client: Client = new Client({
 	intents: [
@@ -454,6 +477,8 @@ for (const file of textCommandFiles) {
 	client.textCommands.set(command.name, command)
 }
 
+// Module override
+
 declare module "discord.js" {
 	export interface Client {
 		commands: Collection<unknown, any>
@@ -461,10 +486,28 @@ declare module "discord.js" {
 	}
 }
 
+// Error Handler
+
+process.on("unhandledRejection", (err: Error) => {
+	log.error(err.stack, "unhandledRejection")
+})
+var debug = true;
+if (debug) {
+	client.on("debug", console.log)
+}
+client.on("ratelimit", (ratelimit) => {
+	log.warn(ratelimit, "CLIENT_RATELIMIT")
+})
+client.on("warn", (warn) => {
+	log.warn(warn, "CLIENT_WARN")
+})
+client.on("error", (error) => {
+	log.error(error, "CLIENT_ERROR")
+})
+
+// Express and API declaration
+
 const app = express()
-
-
-
 app.use(helmet())
 app.use(bodyParser.json())
 app.use(cors({
@@ -478,17 +521,75 @@ app.use(morgan('combined'))
 	next();
 });*/
 
-
-
 app.listen(3000, () => {
 	console.log("Server started on port 3000")
 })
 
+// Optional deployment and once-ready handler
+
 client.once("ready", async () => {
+	// deploy()
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
 
+// Slash Command handler + Search Result handler
+
 client.on("interactionCreate", async (interaction: Interaction) => {
+	if (interaction.isSelectMenu()) {
+		const staff: SF = await Query.staff.getStaffById(parseInt(interaction.values[0]))
+		let fname = staff.name.split(" ")[0]
+		let lname = staff.name.split(" ")[1]
+                const embed = new EmbedBuilder().setTitle(staff.name)
+                let descstr = ""
+                let posarr = await Query.positions.getPositionStaff(staff.id)
+                for (let i = 0; i < posarr.length; i++) {
+                    descstr += `*${posarr[i]}*\n`
+                }
+                embed.setDescription(`${descstr}`)
+                let deptteams = ""
+                let supsstr = ""
+                let deptarr = await Query.departments.getDepartmentStaff(staff.id)
+                console.log(deptarr)
+                let teamarr = await Query.teams.getTeamStaff(staff.id)
+                console.log(teamarr)
+                for (let i = 0; i < deptarr.length; i++) {
+                    let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                    deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                    console.log(team.SupervisorId)
+                    if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                        supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                    }
+                }
+                embed
+                    .addFields(
+                        {
+                            name: "Departments and Teams",
+                            value: `${deptteams}`,
+                            inline: true
+                        },
+                        {
+                            name: "Direct Supervisors",
+                            value: `${supsstr == '' ? "None" : supsstr}`,
+                            inline: true
+                        },
+                        {
+                            name: "Emails",
+                            value: `Personal: ${staff.personalEmail}\nWork: ${staff.companyEmail}`
+                        },
+                        {
+                            name: "Strikes/Censures/Pips",
+                            value: `${staff.strikes}/${staff.censures}/${staff.pips}`,
+                            inline: true
+                        },
+                        {
+                            name: "On Leave?",
+                            value: `${staff.outOfOffice ? "True" : "False"}`,
+                            inline: true
+                        }
+                    )
+                if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
+                await interaction.update({ embeds: [embed], components: [] })
+	}
 	if (
 		interaction.isChatInputCommand() ||
 		interaction.isMessageContextMenuCommand()
@@ -512,6 +613,8 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 	}
 })
 
+// OOO Message Logger
+
 client.on("messageCreate", async (message: Message) => {
 	if (message.mentions.members?.first()) {
 		let memberArr: string[] = [];
@@ -529,11 +632,13 @@ client.on("messageCreate", async (message: Message) => {
 	}
 })
 
+// Dev Text Commands
+
 client.on("messageCreate", async (message: Message) => {
 	const prefix = process.env.DEV_PREFIX as string
 	if (message.content.startsWith(prefix) && !message.author.bot) {
 		const args = message.content.slice(prefix.length).trim().split(/ +/)
-		
+
 		const commandName = args.shift()?.toLowerCase()
 		if (commandName == "testpos") {
 			Query.positions.getPositionStaff(1)
@@ -543,23 +648,23 @@ client.on("messageCreate", async (message: Message) => {
 			// If the message author's ID does not equal
 			// our ownerID, get outta there!
 			if (message.author.id !== "413462464022446084")
-			  return;
-		
+				return;
+
 			// In case something fails, we to catch errors
 			// in a try/catch block
 			try {
-			  // Evaluate (execute) our input
-			  const evaled = eval(args.join(" "));
-		
-			  // Put our eval result through the function
-			  // we defined above
-			  const cleaned = await clean(evaled);
-		
-			  // Reply in the channel with our result
-			  message.channel.send(`\`\`\`js\n${cleaned}\n\`\`\``); 
+				// Evaluate (execute) our input
+				const evaled = eval(args.join(" "));
+
+				// Put our eval result through the function
+				// we defined above
+				const cleaned = await clean(evaled);
+
+				// Reply in the channel with our result
+				message.channel.send(`\`\`\`js\n${cleaned}\n\`\`\``);
 			} catch (err) {
-			  // Reply in the channel with our error
-			  message.channel.send(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
+				// Reply in the channel with our error
+				message.channel.send(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
 			}
 			return
 		}
@@ -592,8 +697,7 @@ client.on("messageCreate", async (message: Message) => {
 		} catch (error) {
 			const ID = log.error(
 				error,
-				`Command ${JSON.stringify(command)}, User: ${message.author.tag}(${
-					message.author.id
+				`Command ${JSON.stringify(command)}, User: ${message.author.tag}(${message.author.id
 				}), Guild: ${message.guild?.name}(${message.guildId}), Args: ${args}`,
 				true
 			)
@@ -603,6 +707,9 @@ client.on("messageCreate", async (message: Message) => {
 		}
 	}
 })
+
+// API Test Object
+
 const src = [
 	{
 		title: "SS HR API",
@@ -610,6 +717,8 @@ const src = [
 		version: "v0.0.1"
 	}
 ]
+
+// Test API Routes
 
 app.get('/', (req: any, res: any) => {
 	res.send(src)
@@ -645,7 +754,12 @@ app.get('/users/email', async (req: any, res: any) => {
 	}
 })
 
+// Discord Login action
+
 client.login(process.env.TOKEN)
+
+
+// Export Footer
 
 export default client
 export {

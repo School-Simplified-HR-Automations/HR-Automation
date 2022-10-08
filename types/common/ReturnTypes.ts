@@ -11,6 +11,7 @@ interface Department {
 	name: string
 	createdAt: any
 	updatedAt: any
+	SupervisorId: number
 }
 
 interface Team {
@@ -19,6 +20,7 @@ interface Team {
 	createdAt: any
 	updatedAt: any
 	DepartmentId: number
+	SupervisorId: number
 }
 
 interface StaffFile {
@@ -71,6 +73,18 @@ interface TeamTableRecord {
 	StaffFileId: number
 }
 
-interface StaffFileArray extends Array<StaffFile> {}
+interface Supervisor {
+	id: number
+	title: string
+	StaffFileId: number
+}
 
-export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord }
+interface Permit {
+	authid: string,
+	createdAt: string,
+	permit: number
+}
+
+interface StaffFileArray extends Array<StaffFile> { }
+
+export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord, Supervisor, Permit }
