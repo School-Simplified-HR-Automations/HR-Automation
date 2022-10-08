@@ -12,7 +12,7 @@ module.exports = {
     async execute(interaction: ChatInputCommandInteraction) {
         try {
             let status = await Query.staff.onLeave(interaction.user.id)
-            if (!status) {
+            if (status !== 1) {
                 await Query.staff.setLeave(interaction.user.id, true).then(() => {
                     return interaction.reply({
                         embeds: [
