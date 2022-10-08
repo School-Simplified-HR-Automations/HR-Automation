@@ -23,10 +23,7 @@ module.exports = {
                 })
             } else {
                 interaction.reply({
-                    embeds: [
-                        new EmbedBuilder().setTitle("Out of Office Stopped").setDescription("Welcome back! To begin OOO time again, just run this command. Please give me a minute to parse your messages!")
-                            .setColor("Green")
-                    ]
+                    content: "**Out of Office Mode Disabled**\n\nWelcome Back! Please give me a minute to parse your messages. If you want to enable this mode again in the future just run this command."
                 })
                 await Query.staff.setLeave(interaction.user.id, false).then(async () => {
                     let records = await Query.staff.getMessages(interaction.user.id) as MessageRecord[]
@@ -64,11 +61,31 @@ module.exports = {
 
                     if (overflow == 0) {
                         return interaction.user.send({ embeds: [embed] })
+							.then(() => {
+								interaction.editReply({
+									content: "**Out of Office Mode Disabled**\n\nWelcome Back! Your parsed message list was sent to your DMs. If you want to enable this mode again in the future just run this command."
+								})
+							})
+							.catch(() => {
+								interaction.editReply({
+									content: "**Out of Office Mode Disabled**\n\nWelcome Back! I was unable to send you your parsed message list because you have DMs off. If you want to enable this mode again in the future just run this command."
+							})
+						})
                     } else {
                         return interaction.user.send({
                             content: `${overflow} messages could not be sent in the embed due to Discord space limitations. For more info on these messages, see the attached file.`,
                             embeds: [embed],
                             files: [new AttachmentBuilder(Buffer.from(buffer), { name: "ooo-report.txt" })]
+                        })
+						.then(() => {
+                            interaction.editReply({
+                                content: "**Out of Office Mode Disabled**\n\nWelcome Back! Your parsed message list was sent to your DMs. If you want to enable this mode again in the future just run this command."
+							})
+						})
+						.catch(() => {
+                            interaction.editReply({
+                                content: "**Out of Office Mode Disabled**\n\nWelcome Back! I was unable to send you your parsed message list because you have DMs off. If you want to enable this mode again in the future just run this command."
+                            })
                         })
                     }
                 })
