@@ -36,7 +36,7 @@ export default class TeamQueryRoutes {
     }
 
     async getTeamStaff(id: number) {
-        let res = (await dbSql.query(`SELECT TeamId FROM teamstaff WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as TeamTableRecord[])
+        let res = (await dbSql.query(`SELECT TeamId FROM positioninfos WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as TeamTableRecord[])
         let ret: string[] = [];
         for (let i = 0; i < res.length; i++) {
             let pos = await this.getTeam({ id: res[i].TeamId })

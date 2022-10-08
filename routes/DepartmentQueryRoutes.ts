@@ -30,7 +30,7 @@ export default class DepartmentQueryRoutes {
     }
 
     async getDepartmentStaff(id: number) {
-        let res = (await dbSql.query(`SELECT DepartmentId FROM departmentstaff WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as DepartmentTableRecord[])
+        let res = (await dbSql.query(`SELECT DepartmentId FROM positioninfos WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as DepartmentTableRecord[])
         let ret: string[] = [];
         for (let i = 0; i < res.length; i++) {
             let pos = await this.getDepartment({ id: res[i].DepartmentId })

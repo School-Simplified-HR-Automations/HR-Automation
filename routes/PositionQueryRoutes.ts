@@ -34,7 +34,7 @@ export default class PositionQueryRoutes {
     }
 
     async getPositionStaff(id: number) {
-        let res = (await dbSql.query(`SELECT PositionId FROM positionstaff WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as PositionTableRecord[])
+        let res = (await dbSql.query(`SELECT PositionId FROM positioninfos WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as PositionTableRecord[])
         let ret: string[] = [];
         for (let i = 0; i < res.length; i++) {
             let pos = await this.getPosition({ id: res[i].PositionId })
