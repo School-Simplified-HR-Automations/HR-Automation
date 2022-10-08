@@ -8,7 +8,7 @@ import sendError from "../utils/sendError"
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("on-leave")
-        .setDescription("You don't need this."),
+        .setDescription("Set or return from Out of Office Hours."),
     async execute(interaction: ChatInputCommandInteraction) {
         try {
             let status = await Query.staff.onLeave(interaction.user.id)
