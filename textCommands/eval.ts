@@ -11,7 +11,7 @@ module.exports = {
 	aliases: ["ev", "evaluate"],
 	async execute(message: Message, args: string[]) {
 		await Security.isEvalerUser(message.author)
-			.then(async (result) => {
+			.then(async (result: any) => {
 				if (result.status !== 1) {
 					message.reply(
 						`\`\`\`diff\n-Security Service Error ${result.status}: ${result.message}\n\`\`\``
@@ -38,7 +38,7 @@ module.exports = {
 					}
 
 					await Security.evalCheck(code, message.author)
-						.then(async (result) => {
+						.then(async (result: any) => {
 							if (result.status !== 1) {
 								message.reply(
 									`\`\`\`diff\n-Security Service Error ${result.status}: ${result.message}\n\`\`\``
@@ -94,7 +94,7 @@ module.exports = {
 								}
 							}
 						})
-						.catch((error) => {
+						.catch((error: any) => {
 							log.error(error, "Failed to check evaler user")
 							message.reply(
 								`\`\`\`diff\nSecurity Service Error 2: Internal error\n\`\`\``
@@ -102,7 +102,7 @@ module.exports = {
 						})
 				}
 			})
-			.catch((error) => {
+			.catch((error: any) => {
 				log.error(
 					error,
 					`Failed to check evaler user ${message.author.tag} (${message.author.id})`

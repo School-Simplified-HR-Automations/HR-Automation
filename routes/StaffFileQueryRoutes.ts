@@ -1,6 +1,8 @@
 import { QueryTypes } from "sequelize"
-import { dbSql } from ".."
+import { dbSql, DiscordInformation } from ".."
+import { StaffFile as File } from ".."
 import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
+import Query from "./query"
 
 /**
  * Provides easy accessible query routes for the "stafffiles" table of the database.
@@ -39,7 +41,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Array of Staff File Objects
 	 */
 	async getStaffByLastName(name: string): Promise<StaffFile[]> {
-		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '%${name}'`, {
+		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '% ${name}%'`, {
 			type: QueryTypes.SELECT,
 		})
 	}
@@ -239,5 +241,38 @@ export default class StaffFileQueryRoutes {
         SET StaffFileId = (SELECT id FROM stafffiles WHERE name = '${fullName}')
         WHERE title = '${title}'`)
 		return
+	}
+
+	async onLeave(discordId: string): Promise<number | null> {
+		onLeave: {
+			let bool = (
+				await dbSql.query(`SELECT outOfOffice FROM stafffiles WHERE id=(SELECT StaffFileId from discordinfos WHERE discordId='${discordId}')`, { type: QueryTypes.SELECT })
+			)[0] as StaffFile
+			if (!bool) {
+				return null;
+			}
+			return bool.outOfOffice
+		}
+	}
+
+	async setLeave(discordId: string, status: boolean): Promise<void> {
+		dbSql.query(`UPDATE stafffiles
+		SET outOfOffice = ${status == true ? 1 : 0}
+		WHERE id = (SELECT StaffFileId FROM discordinfos WHERE discordId='${discordId}')`)
+		return
+	}
+
+	async getMessages(discordId: string) {
+		let records = await dbSql.query(`SELECT * FROM messages WHERE StaffFileId=(SELECT StaffFileId FROM discordinfos WHERE discordId=${discordId})`, { type: QueryTypes.SELECT })
+		return records
+	}
+
+	async dropMessages(discordId: string) {
+		await dbSql.query(`DELETE FROM messages WHERE StaffFileId=(SELECT StaffFileId FROM discordinfos WHERE discordId=${discordId})`)
+	}
+
+	async getStaffBySupervisor(supervisorId: number) {
+		let ret: StaffFile = (await this.getStaffById((await Query.supervisors.getSupervisorById(supervisorId)).StaffFileId))
+		return ret
 	}
 }

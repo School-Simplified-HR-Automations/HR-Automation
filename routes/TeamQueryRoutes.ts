@@ -1,6 +1,6 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
-import { Team } from "../types/common/ReturnTypes"
+import { Team, TeamTableRecord } from "../types/common/ReturnTypes"
 import queryBuilder from "../utils/queryBuilder"
 
 export default class TeamQueryRoutes {
@@ -15,7 +15,6 @@ export default class TeamQueryRoutes {
         let supervisorquery: string | null
         let departmentquery: string | null
         let filters: string[] = []
-
         if (filter.id) {
             idquery = `id = ${filter.id}`
             filters.push (idquery)
@@ -34,5 +33,16 @@ export default class TeamQueryRoutes {
         } else departmentquery = null
         const querystr = queryBuilder('SELECT * FROM teams', filters, 1)
         return (await dbSql.query(querystr, { type: QueryTypes.SELECT }))[0] as Team
+    }
+
+    async getTeamStaff(id: number) {
+        let res = (await dbSql.query(`SELECT TeamId FROM teamstaff WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as TeamTableRecord[])
+        let ret: string[] = [];
+        for (let i = 0; i < res.length; i++) {
+            let pos = await this.getTeam({ id: res[i].TeamId })
+            ret.push(pos.name)
+        }
+
+        return ret
     }
 }

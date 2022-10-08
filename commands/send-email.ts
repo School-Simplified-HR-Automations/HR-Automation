@@ -5,6 +5,7 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js"
+import sendError from "../utils/sendError"
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -28,32 +29,36 @@ module.exports = {
 				.setRequired(true)
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
-		const hirevals = ["acceptance", "rejection", "waitlist"]
-		const recipient = interaction.options.getString("email") as string
-		if (
-			hirevals.includes(interaction.options.getString("category") as string)
-		) {
-			if (!recipient.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/))
-				return interaction.reply({
-					content:
-						"Error: Invalid or match-syntax violating email address provided.",
-				})
-			const modal = new ModalBuilder()
-				.setCustomId("res")
-				.setTitle("Email Details")
+		try {
+			const hirevals = ["acceptance", "rejection", "waitlist"]
+			const recipient = interaction.options.getString("email") as string
+			if (
+				hirevals.includes(interaction.options.getString("category") as string)
+			) {
+				if (!recipient.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/))
+					return interaction.reply({
+						content:
+							"Error: Invalid or match-syntax violating email address provided.",
+					})
+				const modal = new ModalBuilder()
+					.setCustomId("res")
+					.setTitle("Email Details")
 
-			const userDetails = new TextInputBuilder()
-				.setCustomId("userdetails")
-				.setLabel("Recipient Full Name")
-				.setStyle(TextInputStyle.Short)
-			const hiredetails = new TextInputBuilder()
-				.setCustomId("hiredetails")
-				.setLabel("Position Applied For")
-				.setStyle(TextInputStyle.Short)
-			const deptdetails = new TextInputBuilder()
-				.setCustomId("deptdetails")
-				.setLabel("Department of Position")
-				.setStyle(TextInputStyle.Short)
+				const userDetails = new TextInputBuilder()
+					.setCustomId("userdetails")
+					.setLabel("Recipient Full Name")
+					.setStyle(TextInputStyle.Short)
+				const hiredetails = new TextInputBuilder()
+					.setCustomId("hiredetails")
+					.setLabel("Position Applied For")
+					.setStyle(TextInputStyle.Short)
+				const deptdetails = new TextInputBuilder()
+					.setCustomId("deptdetails")
+					.setLabel("Department of Position")
+					.setStyle(TextInputStyle.Short)
+			}
+		} catch (err) {
+			sendError(err, interaction, false)
 		}
 	},
 }

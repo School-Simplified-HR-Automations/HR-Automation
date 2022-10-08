@@ -1,4 +1,4 @@
-import {
+/**import {
 	ChatInputCommandInteraction,
 	SlashCommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
@@ -51,4 +51,4 @@ module.exports = {
 				content: `Error during execution - ${error.error}`,
 			})
 	},
-}
+}*/

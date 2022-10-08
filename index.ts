@@ -1,10 +1,11 @@
+// Import Header
 import { Collection } from "@discordjs/collection"
-import { Interaction, Client, GatewayIntentBits, Message } from "discord.js"
+import { Interaction, Client, GatewayIntentBits, Message, Partials, EmbedBuilder } from "discord.js"
 import fs from "fs"
 import path from "path"
 require("dotenv").config()
 import { log } from "./services/logger"
-import { DataTypes, Sequelize } from "sequelize"
+import { DataTypes, NUMBER, Sequelize } from "sequelize"
 import { Stopwatch } from "@sapphire/stopwatch"
 import { BootCheck } from "./utils/bootCheck"
 import { Security } from "./services/security"
@@ -14,10 +15,13 @@ import helmet from "helmet"
 import bodyParser from "body-parser"
 import morgan from "morgan"
 import Query from "./routes/query"
-
+import deploy from "./appcommands/deploy"
+import clean from "./utils/clean"
+import { StaffFile as SF } from "./types/common/ReturnTypes"
+const sw = new Stopwatch().start()
 BootCheck.check()
 
-// Create a new client instance
+// Sequelize Client
 const dbSql = new Sequelize(process.env.SQL_URI as string, {
 	username: process.env.SQL_USERNAME,
 	password: process.env.SQL_PASSWORD,
@@ -30,7 +34,8 @@ const dbSql = new Sequelize(process.env.SQL_URI as string, {
 		multipleStatements: true,
 	},
 })
-// model declarations
+
+// Models
 
 const Team = dbSql.define("Team", {
 	name: {
@@ -112,6 +117,11 @@ const StaffFile = dbSql.define("StaffFile", {
 		allowNull: false,
 		defaultValue: false,
 	},
+	outOfOffice: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
+	}
 })
 const PositionHistory = dbSql.define("PositionHistory", {
 	title: {
@@ -166,146 +176,102 @@ const Department = dbSql.define("Department", {
 		unique: true,
 	},
 })
-const StrikeHistory = dbSql.define("StrikeHistory", {
-	details: {
+
+const Messages = dbSql.define("messages", {
+	authoruser: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	authorid: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageChannelId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	messageServerId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	time: {
+		type: DataTypes.DATE,
+		allowNull: false
+	}
+})
+
+const APIAuths = dbSql.define("apiauths", {
+	authid: {
 		type: DataTypes.STRING,
 		allowNull: false,
+		unique: true
 	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
+	admin: {
+		type: DataTypes.STRING,
+		allowNull: false
 	},
-	administrator: {
+	backup: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	permit: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	}
+})
+
+const PositionInfo = dbSql.define("positioninfos", {
+	StaffFileId: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
+		unique: false
 	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
-})
-const CensureHistory = dbSql.define("CensureHistory", {
-	details: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	administrator: {
+	PositionId: {
 		type: DataTypes.INTEGER,
-		allowNull: false,
+		allowNull: false
 	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
-})
-const PIPHistory = dbSql.define("PIPHistory", {
-	details: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	dateGiven: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	administrator: {
+	TeamId: {
 		type: DataTypes.INTEGER,
-		allowNull: false,
+		allowNull: false
 	},
-	evidenceLink: {
-		type: DataTypes.STRING,
-		allowNull: true,
-	},
+	DepartmentId: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	}
 })
-const BreakRecord = dbSql.define("BreakRecord", {
-	dateFrom: {
-		type: DataTypes.DATE,
-		allowNull: false,
+
+const Record = dbSql.define("records", {
+	StaffFileRec: {
+		type: DataTypes.INTEGER,
+		allowNull: false
 	},
-	dateTo: {
+	StaffFileAdm: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	date: {
 		type: DataTypes.DATE,
-		allowNull: false,
+		allowNull: false
+	},
+	dateExp: {
+		type: DataTypes.DATE,
+		allowNull: true
 	},
 	reason: {
 		type: DataTypes.STRING,
-		allowNull: false,
+		allowNull: false
 	},
-	approval: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
+	detailLink: {
+		type: DataTypes.STRING,
+		allowNull: true
 	},
 })
-const Tickets = dbSql.define("Tickets", {
-	channelId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	authorId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	paneltpguid: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	status: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	openDate: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	closeDate: {
-		type: DataTypes.DATE,
-		allowNull: true,
-	},
-})
-const TicketPanels = dbSql.define("TicketPanels", {
-	name: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	value: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	description: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	channelPrefix: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	guildId: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	buttonName: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	tpguid: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	messageLink: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	category: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	logChannel: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-})
+
+// Association Section
 
 // Supervisor Associations
 Supervisor.hasMany(Department)
@@ -317,6 +283,12 @@ StaffFile.hasOne(Supervisor)
 Supervisor.hasMany(Team)
 Team.belongsToMany(Supervisor, { through: "TeamSupervisor" })
 
+Supervisor.hasMany(Position)
+Position.belongsTo(Supervisor)
+
+Team.hasMany(Position)
+Position.belongsTo(Team)
+
 // StaffFile Associations
 StaffFile.hasOne(DiscordInformation)
 DiscordInformation.belongsTo(StaffFile)
@@ -324,16 +296,8 @@ DiscordInformation.belongsTo(StaffFile)
 StaffFile.hasMany(PositionHistory)
 PositionHistory.belongsTo(StaffFile)
 
-StaffFile.hasMany(StrikeHistory)
-StrikeHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(CensureHistory), CensureHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(PIPHistory)
-PIPHistory.belongsTo(StaffFile)
-
-StaffFile.hasMany(BreakRecord)
-BreakRecord.belongsTo(StaffFile)
+StaffFile.hasMany(Record)
+Record.belongsTo(StaffFile)
 
 StaffFile.belongsTo(Team)
 Team.hasMany(StaffFile)
@@ -341,10 +305,8 @@ Team.hasMany(StaffFile)
 StaffFile.belongsTo(Department)
 Department.hasMany(StaffFile)
 
-Position.hasMany(StaffFile)
-StaffFile.belongsToMany(Position, {
-	through: "PositionStaff",
-})
+StaffFile.hasMany(Messages)
+Messages.belongsTo(StaffFile)
 
 // Team Associations
 
@@ -362,6 +324,8 @@ PositionHistory.belongsTo(Department)
 Position.belongsTo(Department)
 Department.hasMany(Position)
 
+// Discord Client Declaration
+
 const client: Client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -370,6 +334,7 @@ const client: Client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 	],
+	partials: [Partials.Channel]
 })
 // @ts-ignore
 client.commands = new Collection()
@@ -396,6 +361,8 @@ for (const file of textCommandFiles) {
 	client.textCommands.set(command.name, command)
 }
 
+// Module override
+
 declare module "discord.js" {
 	export interface Client {
 		commands: Collection<unknown, any>
@@ -403,10 +370,28 @@ declare module "discord.js" {
 	}
 }
 
+// Error Handler
+
+process.on("unhandledRejection", (err: Error) => {
+	log.error(err.stack, "unhandledRejection")
+})
+var debug = true;
+if (debug) {
+	client.on("debug", console.log)
+}
+client.on("ratelimit", (ratelimit) => {
+	log.warn(ratelimit, "CLIENT_RATELIMIT")
+})
+client.on("warn", (warn) => {
+	log.warn(warn, "CLIENT_WARN")
+})
+client.on("error", (error) => {
+	log.error(error, "CLIENT_ERROR")
+})
+
+// Express and API declaration
+
 const app = express()
-
-
-
 app.use(helmet())
 app.use(bodyParser.json())
 app.use(cors({
@@ -420,18 +405,75 @@ app.use(morgan('combined'))
 	next();
 });*/
 
-
-
 app.listen(3000, () => {
 	console.log("Server started on port 3000")
 })
 
+// Optional deployment and once-ready handler
+
 client.once("ready", async () => {
-	const sw = new Stopwatch().start()
+	deploy()
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
 
+// Slash Command handler + Search Result handler
+
 client.on("interactionCreate", async (interaction: Interaction) => {
+	if (interaction.isSelectMenu()) {
+		const staff: SF = await Query.staff.getStaffById(parseInt(interaction.values[0]))
+		let fname = staff.name.split(" ")[0]
+		let lname = staff.name.split(" ")[1]
+                const embed = new EmbedBuilder().setTitle(staff.name)
+                let descstr = ""
+                let posarr = await Query.positions.getPositionStaff(staff.id)
+                for (let i = 0; i < posarr.length; i++) {
+                    descstr += `*${posarr[i]}*\n`
+                }
+                embed.setDescription(`${descstr}`)
+                let deptteams = ""
+                let supsstr = ""
+                let deptarr = await Query.departments.getDepartmentStaff(staff.id)
+                console.log(deptarr)
+                let teamarr = await Query.teams.getTeamStaff(staff.id)
+                console.log(teamarr)
+                for (let i = 0; i < deptarr.length; i++) {
+                    let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                    deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                    console.log(team.SupervisorId)
+                    if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                        supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                    }
+                }
+                embed
+                    .addFields(
+                        {
+                            name: "Departments and Teams",
+                            value: `${deptteams}`,
+                            inline: true
+                        },
+                        {
+                            name: "Direct Supervisors",
+                            value: `${supsstr == '' ? "None" : supsstr}`,
+                            inline: true
+                        },
+                        {
+                            name: "Emails",
+                            value: `Personal: ${staff.personalEmail}\nWork: ${staff.companyEmail}`
+                        },
+                        {
+                            name: "Strikes/Censures/Pips",
+                            value: `${staff.strikes}/${staff.censures}/${staff.pips}`,
+                            inline: true
+                        },
+                        {
+                            name: "On Leave?",
+                            value: `${staff.outOfOffice ? "True" : "False"}`,
+                            inline: true
+                        }
+                    )
+                if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
+                await interaction.update({ embeds: [embed], components: [] })
+	}
 	if (
 		interaction.isChatInputCommand() ||
 		interaction.isMessageContextMenuCommand()
@@ -455,11 +497,61 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 	}
 })
 
+// OOO Message Logger
+
+client.on("messageCreate", async (message: Message) => {
+	if (message.mentions.members?.first()) {
+		let memberArr: string[] = [];
+		message.mentions.members.forEach(member => memberArr.push(member.user.id))
+		for (let i = 0; i < memberArr.length; i++) {
+			const leave = await Query.staff.onLeave(memberArr[i])
+			if (leave) {
+				const guildId = message.guild?.id
+				const channelId = message.channel.id
+				dbSql.query(`INSERT INTO messages
+				(authoruser, authorid, messageid, messageChannelId, messageServerId, time, createdAt, updatedAt, StaffFileId)
+				VALUES ('${message.member?.displayName}', '${message.member?.id}', '${message.id}', '${channelId}', '${guildId}', now(), now(), now(), (SELECT StaffFileId FROM discordinfos WHERE discordId='${memberArr[i]}'))`)
+			}
+		}
+	}
+})
+
+// Dev Text Commands
+
 client.on("messageCreate", async (message: Message) => {
 	const prefix = process.env.DEV_PREFIX as string
 	if (message.content.startsWith(prefix) && !message.author.bot) {
 		const args = message.content.slice(prefix.length).trim().split(/ +/)
+
 		const commandName = args.shift()?.toLowerCase()
+		if (commandName == "testpos") {
+			Query.positions.getPositionStaff(1)
+		}
+		if (commandName == "eval") {
+
+			// If the message author's ID does not equal
+			// our ownerID, get outta there!
+			if (message.author.id !== "413462464022446084")
+				return;
+
+			// In case something fails, we to catch errors
+			// in a try/catch block
+			try {
+				// Evaluate (execute) our input
+				const evaled = eval(args.join(" "));
+
+				// Put our eval result through the function
+				// we defined above
+				const cleaned = await clean(evaled);
+
+				// Reply in the channel with our result
+				message.channel.send(`\`\`\`js\n${cleaned}\n\`\`\``);
+			} catch (err) {
+				// Reply in the channel with our error
+				message.channel.send(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
+			}
+			return
+		}
 
 		const command =
 			(await client.textCommands.get(commandName)) ||
@@ -489,8 +581,7 @@ client.on("messageCreate", async (message: Message) => {
 		} catch (error) {
 			const ID = log.error(
 				error,
-				`Command ${JSON.stringify(command)}, User: ${message.author.tag}(${
-					message.author.id
+				`Command ${JSON.stringify(command)}, User: ${message.author.tag}(${message.author.id
 				}), Guild: ${message.guild?.name}(${message.guildId}), Args: ${args}`,
 				true
 			)
@@ -500,6 +591,9 @@ client.on("messageCreate", async (message: Message) => {
 		}
 	}
 })
+
+// API Test Object
+
 const src = [
 	{
 		title: "SS HR API",
@@ -507,6 +601,8 @@ const src = [
 		version: "v0.0.1"
 	}
 ]
+
+// Test API Routes
 
 app.get('/', (req: any, res: any) => {
 	res.send(src)
@@ -542,7 +638,12 @@ app.get('/users/email', async (req: any, res: any) => {
 	}
 })
 
+// Discord Login action
+
 client.login(process.env.TOKEN)
+
+
+// Export Footer
 
 export default client
 export {

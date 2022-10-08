@@ -1,0 +1,47 @@
+Date : 2022-10-07 22:22:01
+Directory : c:\Users\tm21c\Desktop\Code Projects\SS HR Automation
+Total : 13 files,  171 codes, -11 comments, 9 blanks, all 169 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| TypeScript         |         10 |        170 |        -10 |          9 |        169 |
+| JSON with Comments |          1 |          1 |         -1 |          0 |          0 |
+| Markdown           |          2 |          0 |          0 |          0 |          0 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                            | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                               |         13 |        171 |        -11 |          9 |        169 |
+| .github                                                                                         |          1 |        -16 |          0 |        -12 |        -28 |
+| .github\ISSUE_TEMPLATE                                                                          |          1 |        -16 |          0 |        -12 |        -28 |
+| ISSUE_TEMPLATE                                                                                  |          1 |         16 |          0 |         12 |         28 |
+| commands                                                                                        |          1 |        100 |          0 |          1 |        101 |
+| routes                                                                                          |          5 |         33 |        -10 |          4 |         27 |
+| types                                                                                           |          1 |         15 |          0 |          3 |         18 |
+| types\common                                                                                    |          1 |         15 |          0 |          3 |         18 |
+| utils                                                                                           |          2 |          7 |          0 |          0 |          7 |
++-------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                        | language           | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\.github\ISSUE_TEMPLATE\feature_request.md | Markdown           |        -16 |          0 |        -12 |        -28 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\ISSUE_TEMPLATE\feature_request.md         | Markdown           |         16 |          0 |         12 |         28 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\commands\lookup.ts                        | TypeScript         |        100 |          0 |          1 |        101 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\index.ts                                  | TypeScript         |         15 |          0 |          1 |         16 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\DepartmentQueryRoutes.ts           | TypeScript         |          9 |        -10 |          1 |          0 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\StaffFileQueryRoutes.ts            | TypeScript         |          4 |          0 |          1 |          5 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\SupervisorQueryRoutes.ts           | TypeScript         |          9 |          0 |          1 |         10 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\TeamQueryRoutes.ts                 | TypeScript         |          9 |          0 |          1 |         10 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\query.ts                           | TypeScript         |          2 |          0 |          0 |          2 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\tsconfig.json                             | JSON with Comments |          1 |         -1 |          0 |          0 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\types\common\ReturnTypes.ts               | TypeScript         |         15 |          0 |          3 |         18 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\utils\bootCheck.ts                        | TypeScript         |          3 |          0 |          0 |          3 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\utils\sendError.ts                        | TypeScript         |          4 |          0 |          0 |          4 |
+| Total                                                                                           |                    |        171 |        -11 |          9 |        169 |
++-------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

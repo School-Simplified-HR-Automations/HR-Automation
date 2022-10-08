@@ -1,0 +1,35 @@
+Date : 2022-10-08 00:13:33
+Directory : c:\Users\tm21c\Desktop\Code Projects\SS HR Automation
+Total : 6 files,  58 codes, 0 comments, 7 blanks, all 65 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| TypeScript |          5 |         56 |          0 |          7 |         63 |
+| Properties |          1 |          2 |          0 |          0 |          2 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                              | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                 |          6 |         58 |          0 |          7 |         65 |
+| commands                                                                          |          1 |          9 |          0 |          3 |         12 |
+| routes                                                                            |          2 |         24 |          0 |          3 |         27 |
+| types                                                                             |          1 |          5 |          0 |          1 |          6 |
+| types\common                                                                      |          1 |          5 |          0 |          1 |          6 |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                          | language   | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\.env                        | Properties |          2 |          0 |          0 |          2 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\commands\permit.ts          | TypeScript |          9 |          0 |          3 |         12 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\index.ts                    | TypeScript |         18 |          0 |          0 |         18 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\AuthQueryRoutes.ts   | TypeScript |         22 |          0 |          3 |         25 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\routes\query.ts             | TypeScript |          2 |          0 |          0 |          2 |
+| c:\Users\tm21c\Desktop\Code Projects\SS HR Automation\types\common\ReturnTypes.ts | TypeScript |          5 |          0 |          1 |          6 |
+| Total                                                                             |            |         58 |          0 |          7 |         65 |
++-----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
