@@ -3,6 +3,7 @@ import {
 	Embed,
 	EmbedBuilder,
 	SlashCommandBuilder,
+	User,
 } from "discord.js"
 import StaffFileQueryRoutes from "../routes/StaffFileQueryRoutes"
 import sendError from "../utils/sendError"
@@ -32,13 +33,7 @@ module.exports = {
 				.setDescription("The user's department.")
 				.setRequired(true)
 		)
-		.addStringOption((opt) =>
-			opt
-				.setName("discord-user")
-				.setDescription("The user's Discord username with tag (xyz#xxxx).")
-				.setRequired(true)
-		)
-		.addStringOption((opt) =>
+		.addUserOption((opt) =>
 			opt
 				.setName("discord-id")
 				.setDescription("The user's Discord ID.")
@@ -62,8 +57,9 @@ module.exports = {
 			const fullname = interaction.options.getString("full-name") as string
 			const position = interaction.options.getString("position") as string
 			const department = interaction.options.getString("department") as string
-			const user = interaction.options.getString("discord-user") as string
-			const id = interaction.options.getString("discord-id") as string
+			const useropt = interaction.options.getUser("discord-id") as User
+			const user = useropt.username
+			const id = useropt.id
 			const team = interaction.options.getString("team") as string
 			const supervisor = interaction.options.getBoolean("supervisor") ?? false
 			if (interaction.user.id !== "413462464022446084") return
