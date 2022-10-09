@@ -63,7 +63,7 @@ module.exports = {
                     }
 
                     if (overflow == 0) {
-                        return interaction.user.send({ embeds: [embed] })
+                        return interaction.user.send({ embeds: [embed] }).then(async () => await Query.staff.dropMessages(interaction.user.id))
                     } else {
                         return interaction.user.send({
                             content: `${overflow} messages could not be sent in the embed due to Discord space limitations. For more info on these messages, see the attached file.`,

@@ -6,6 +6,7 @@ import {
 } from "discord.js"
 import StaffFileQueryRoutes from "../routes/StaffFileQueryRoutes"
 import sendError from "../utils/sendError"
+import { Stopwatch } from "@sapphire/stopwatch"
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -17,12 +18,6 @@ module.exports = {
 			opt
 				.setName("full-name")
 				.setDescription("The user's full name.")
-				.setRequired(true)
-		)
-		.addStringOption((opt) =>
-			opt
-				.setName("ss-email")
-				.setDescription("The user's School Simplified email address.")
 				.setRequired(true)
 		)
 		.addStringOption((opt) =>
@@ -39,14 +34,20 @@ module.exports = {
 		)
 		.addStringOption((opt) =>
 			opt
-				.setName("team")
-				.setDescription("Opt -> The user's team.")
-				.setRequired(false)
+				.setName("discord-user")
+				.setDescription("The user's Discord username with tag (xyz#xxxx).")
+				.setRequired(true)
 		)
 		.addStringOption((opt) =>
 			opt
-				.setName("p-email")
-				.setDescription("Opt -> The user's personal email.")
+				.setName("discord-id")
+				.setDescription("The user's Discord ID.")
+				.setRequired(true)
+		)
+		.addStringOption((opt) =>
+			opt
+				.setName("team")
+				.setDescription("Opt -> The user's team.")
 				.setRequired(false)
 		)
 		.addBooleanOption((opt) =>
@@ -57,12 +58,13 @@ module.exports = {
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		try {
-			const fullname = interaction.options.getString("full-name")
-			const email = interaction.options.getString("ss-email")
-			const position = interaction.options.getString("position")
-			const department = interaction.options.getString("department")
-			const team = interaction.options.getString("team")
-			const pemail = interaction.options.getString("p-email")
+			const sw = new Stopwatch().start()
+			const fullname = interaction.options.getString("full-name") as string
+			const position = interaction.options.getString("position") as string
+			const department = interaction.options.getString("department") as string
+			const user = interaction.options.getString("discord-user") as string
+			const id = interaction.options.getString("discord-id") as string
+			const team = interaction.options.getString("team") as string
 			const supervisor = interaction.options.getBoolean("supervisor") ?? false
 			if (interaction.user.id !== "413462464022446084") return
 			await interaction.reply({
@@ -71,12 +73,13 @@ module.exports = {
 			if (team) {
 				await new StaffFileQueryRoutes()
 					.createStaffFile(
-						`${fullname}`,
+						fullname,
 						"Active",
-						`${department}`,
-						`${position}`,
-						`${email}`,
-						`${team}`
+						department,
+						position,
+						user,
+						id,
+						team
 					)
 					.then(async () => {
 						if (supervisor) {
@@ -87,7 +90,7 @@ module.exports = {
 										embeds: [
 											new EmbedBuilder()
 												.setTitle("Finished")
-												.setDescription("Finished creating staff profile.")
+												.setDescription(`Finished creating staff profile in ${sw.stop().toString()}`)
 												.setColor("Green"),
 										],
 									})
@@ -109,7 +112,7 @@ module.exports = {
 								embeds: [
 									new EmbedBuilder()
 										.setTitle("Finished")
-										.setDescription("Finished creating staff profile.")
+										.setDescription(`Finished creating staff profile in ${sw.stop().toString()}`)
 										.setColor("Green"),
 								],
 							})
@@ -130,11 +133,12 @@ module.exports = {
 			} else {
 				await new StaffFileQueryRoutes()
 					.createStaffFile(
-						`${fullname}`,
+						fullname,
 						"Active",
-						`${department}`,
-						`${position}`,
-						`${email}`
+						department,
+						position,
+						user,
+						id
 					)
 					.then(async () => {
 						if (supervisor) {
@@ -145,7 +149,7 @@ module.exports = {
 										embeds: [
 											new EmbedBuilder()
 												.setTitle("Finished")
-												.setDescription("Finished creating staff profile.")
+												.setDescription(`Finished creating staff profile in ${sw.stop().toString()}`)
 												.setColor("Green"),
 										],
 									})
@@ -167,7 +171,7 @@ module.exports = {
 								embeds: [
 									new EmbedBuilder()
 										.setTitle("Finished")
-										.setDescription("Finished creating staff profile.")
+										.setDescription(`Finished creating staff profile in ${sw.stop().toString()}`)
 										.setColor("Green"),
 								],
 							})

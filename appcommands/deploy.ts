@@ -17,10 +17,10 @@ const deploy = () => {
 		commands.push(command.data.toJSON())
 	}
 
-	const rest = new REST({ version: "10" }).setToken(process.env.TOKEN as string)
+	const rest = new REST({ version: "10" }).setToken(process.env.DEV_TOKEN as string)
 
 	rest
-		.put(Routes.applicationCommands(process.env.CLIENT_ID as string), {
+		.put(Routes.applicationCommands(process.env.DEV_CLIENT_ID as string), {
 			body: commands,
 		})
 		.then(() => console.log("Successfully registered application commands."))
