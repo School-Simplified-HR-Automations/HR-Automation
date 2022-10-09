@@ -639,7 +639,7 @@ app.get('/users/email', async (req: any, res: any) => {
 
 // Discord Login action
 
-client.login(process.env.DEV_TOKEN)
+client.login(process.env.TOKEN)
 
 
 // Export Footer
