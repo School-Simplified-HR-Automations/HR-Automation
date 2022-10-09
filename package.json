@@ -1,6 +1,6 @@
 {
     "name": "sshrstaff",
-    "version": "0.7.0-unstable",
+    "version": "0.7.1-unstable",
     "description": "",
     "main": "index.ts",
     "scripts": {
