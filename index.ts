@@ -18,6 +18,7 @@ import Query from "./routes/query"
 import deploy from "./appcommands/deploy"
 import clean from "./utils/clean"
 import { StaffFile as SF } from "./types/common/ReturnTypes"
+import undeploy from "./appcommands/undeploy"
 const sw = new Stopwatch().start()
 BootCheck.check()
 
@@ -121,6 +122,21 @@ const StaffFile = dbSql.define("StaffFile", {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: false
+	},
+	username: {
+		type: DataTypes.STRING,
+		validate: {
+			is: /.{1,}#[0-9]{4}/,
+		},
+		allowNull: true,
+	},
+	discordId: {
+		type: DataTypes.STRING,
+		validate: {
+			is: /[0-9]{17,}/,
+		},
+		allowNull: true,
+		unique: true,
 	}
 })
 const PositionHistory = dbSql.define("PositionHistory", {
@@ -148,23 +164,6 @@ const PositionHistory = dbSql.define("PositionHistory", {
 const Position = dbSql.define("Position", {
 	title: {
 		type: DataTypes.STRING,
-		allowNull: false,
-		unique: true,
-	},
-})
-const DiscordInformation = dbSql.define("DiscordInfo", {
-	username: {
-		type: DataTypes.STRING,
-		validate: {
-			is: /.{1,}#[0-9]{4}/,
-		},
-		allowNull: false,
-	},
-	discordId: {
-		type: DataTypes.STRING,
-		validate: {
-			is: /[0-9]{17,}/,
-		},
 		allowNull: false,
 		unique: true,
 	},
@@ -290,8 +289,7 @@ Team.hasMany(Position)
 Position.belongsTo(Team)
 
 // StaffFile Associations
-StaffFile.hasOne(DiscordInformation)
-DiscordInformation.belongsTo(StaffFile)
+
 
 StaffFile.hasMany(PositionHistory)
 PositionHistory.belongsTo(StaffFile)
@@ -412,6 +410,7 @@ app.listen(3000, () => {
 // Optional deployment and once-ready handler
 
 client.once("ready", async () => {
+	// undeploy()
 	deploy()
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
@@ -510,7 +509,7 @@ client.on("messageCreate", async (message: Message) => {
 				const channelId = message.channel.id
 				dbSql.query(`INSERT INTO messages
 				(authoruser, authorid, messageid, messageChannelId, messageServerId, time, createdAt, updatedAt, StaffFileId)
-				VALUES ('${message.member?.displayName}', '${message.member?.id}', '${message.id}', '${channelId}', '${guildId}', now(), now(), now(), (SELECT StaffFileId FROM discordinfos WHERE discordId='${memberArr[i]}'))`)
+				VALUES ('${message.member?.displayName}', '${message.member?.id}', '${message.id}', '${channelId}', '${guildId}', now(), now(), now(), (SELECT id FROM stafffiles WHERE discordId='${memberArr[i]}'))`)
 			}
 		}
 	}
@@ -649,7 +648,6 @@ export default client
 export {
 	dbSql,
 	Department,
-	DiscordInformation,
 	PositionHistory,
 	Position,
 	StaffFile,

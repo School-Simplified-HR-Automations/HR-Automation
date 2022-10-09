@@ -58,7 +58,6 @@ module.exports = {
                         }
                         ctr++
                     }
-
                     if (overflow == 0) {
                         return interaction.user.send({ embeds: [embed] })
 							.then(() => {
@@ -90,6 +89,7 @@ module.exports = {
                     }
                 })
             }
+            return await Query.staff.dropMessages(interaction.user.id)
         } catch (err) {
             sendError(err, interaction, false)
         }

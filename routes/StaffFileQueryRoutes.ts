@@ -1,5 +1,5 @@
 import { QueryTypes } from "sequelize"
-import { dbSql, DiscordInformation } from ".."
+import { dbSql } from ".."
 import { StaffFile as File } from ".."
 import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
 import Query from "./query"
@@ -125,7 +125,8 @@ export default class StaffFileQueryRoutes {
 			| "Blacklisted",
 		departmentName: string,
 		positionName: string,
-		email: string,
+		discordUser: string,
+		discordId: string,
 		teamName?: string,
 		appStatus?:
 			| "Awaiting Review"
@@ -141,47 +142,38 @@ export default class StaffFileQueryRoutes {
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
-                    name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, TeamId, DepartmentId, PositionId
+                    id, name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, outOfOffice, createdAt, updatedAt, TeamId, DepartmentId, username, discordId
                 )
                 VALUES (
-                    '${fullName}', null, '${email}', null, null, null, null, null, '${appStatus}', 0, 0, 0, '${activityStatus}', false, now(), now(), @teamid, @departmentid, @positionid
+                    ${parseInt(discordId.slice(discordId.length - 6))},'${fullName}', null, '${fullName.split(" ")[0].toLowerCase()}.${fullName.split(" ")[1].toLowerCase()}@schoolsimplified.org', null, null, null, null, null, '${appStatus}', 0, 0, 0, '${activityStatus}', 0, 0, now(), now(), @teamid, @departmentid, '${discordUser}', '${discordId}'
                 );
                 SET @staffid = (SELECT id FROM stafffiles WHERE name = '${fullName}');
-                INSERT INTO positionhistories (
-                    title, dept, team, joined, quit, createdAt, updatedAt, StaffFileId, PositionId, DepartmentId
+                INSERT INTO positioninfos (
+                    StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt
                 )
                 VALUES (
-                    '${positionName}', '${departmentName}', '${teamName}', now(), null, now(), now(), @staffid, @positionid, @departmentid
+                    @staffid, @positionid, @teamid, @departmentid, now(), now()
                 );
-                INSERT INTO positionstaff (
-                    createdAt, updatedAt, StaffFileId, PositionId
-                )
-                VALUES (
-                    now(), now(), @staffid, @positionid
-                )`)
+				`)
 				return
 			} else {
 				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
+                SET @teamid = (SELECT TeamId FROM positions WHERE id = @positionid);
                 INSERT INTO stafffiles (
-                    name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
+                    id, name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, appStatus, strikes, censures, pips, activityStatus, alumni, outOfOffice, createdAt, updatedAt, TeamId, DepartmentId, username, discordId
                 )
                 VALUES (
-                    '${fullName}', null, '${email}', null, null, null, null, null, '${appStatus}', 0, 0, 0, '${activityStatus}', false, now(), now(), @departmentid, @positionid
+                    ${parseInt(discordId.slice(discordId.length - 6))}, '${fullName}', null, '${fullName.split(" ")[0].toLowerCase()}.${fullName.split(" ")[1].toLowerCase()}@schoolsimplified.org', null, null, null, null, null, '${appStatus}', 0, 0, 0, '${activityStatus}', 0, 0, now(), now(), @teamid, @departmentid, '${discordUser}', '${discordId}'
                 );
                 SET @staffid = (SELECT id FROM stafffiles WHERE name = '${fullName}');
-                INSERT INTO positionhistories (
-                    title, dept, joined, quit, createdAt, updatedAt, StaffFileId, PositionId, DepartmentId
+                INSERT INTO positioninfos (
+                    StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt
                 )
                 VALUES (
-                    '${positionName}', '${departmentName}', now(), null, now(), now(), @staffid, @positionid, @departmentid
+                    @staffid, @positionid, @teamid, @departmentid, now(), now()
                 );
-                INSERT INTO positionstaff (
-                    createdAt, updatedAt, StaffFileId, PositionId
-                )
-                VALUES (
-                    now(), now(), @staffid, @positionid
-                )`)
+				`)
 				return
 			}
 		} else {
@@ -190,47 +182,38 @@ export default class StaffFileQueryRoutes {
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
                 INSERT INTO stafffiles (
-                    name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, TeamId, DepartmentId, PositionId
+                    id, name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, outOfOffice, createdAt, updatedAt, TeamId, DepartmentId, username, discordId
                 )
                 VALUES (
-                    '${fullName}', null, '${email}', null, null, null, null, null, 0, 0, 0, '${activityStatus}', false, now(), now(), @teamid, @departmentid, @positionid
+                    ${parseInt(discordId.slice(discordId.length - 6))}, '${fullName}', null, '${fullName.split(" ")[0].toLowerCase()}.${fullName.split(" ")[1].toLowerCase()}@schoolsimplified.org', null, null, null, null, null, 0, 0, 0, '${activityStatus}', 0, 0, now(), now(), @teamid, @departmentid, '${discordUser}', '${discordId}'
                 );
                 SET @staffid = (SELECT id FROM stafffiles WHERE name = '${fullName}');
-                INSERT INTO positionhistories (
-                    title, dept, team, joined, quit, createdAt, updatedAt, StaffFileId, PositionId, DepartmentId
+                INSERT INTO positioninfos (
+                    StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt
                 )
                 VALUES (
-                    '${positionName}', '${departmentName}', '${teamName}', now(), null, now(), now(), @staffid, @positionid, @departmentid
+                    @staffid, @positionid, @teamid, @departmentid, now(), now()
                 );
-                INSERT INTO positionstaff (
-                    createdAt, updatedAt, StaffFileId, PositionId
-                )
-                VALUES (
-                    now(), now(), @staffid, @positionid
-                )`)
+				`)
 				return
 			} else {
 				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
+                SET @teamid = (SELECT TeamId FROM positions WHERE id = @positionid);
                 INSERT INTO stafffiles (
-                    name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, createdAt, updatedAt, DepartmentId, PositionId
+                    id, name, personalEmail, companyEmail, photoLink, phone, legalSex, genderIdentity, ethnicity, strikes, censures, pips, activityStatus, alumni, outOfOffice, createdAt, updatedAt, TeamId, DepartmentId, username, discordId
                 )
                 VALUES (
-                    '${fullName}', null, '${email}', null, null, null, null, null, 0, 0, 0, '${activityStatus}', false, now(), now(), @departmentid, @positionid
+                    ${parseInt(discordId.slice(discordId.length - 6))}, '${fullName}', null, '${fullName.split(" ")[0].toLowerCase()}.${fullName.split(" ")[1].toLowerCase()}@schoolsimplified.org', null, null, null, null, null, 0, 0, 0, '${activityStatus}', 0, 0, now(), now(), @teamid, @departmentid, '${discordUser}', '${discordId}'
                 );
                 SET @staffid = (SELECT id FROM stafffiles WHERE name = '${fullName}');
-                INSERT INTO positionhistories (
-                    title, dept, joined, quit, createdAt, updatedAt, StaffFileId, PositionId, DepartmentId
+                INSERT INTO positioninfos (
+                    StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt
                 )
                 VALUES (
-                    '${positionName}', '${departmentName}', now(), null, now(), now(), @staffid, @positionid, @departmentid
+                    @staffid, @positionid, @teamid, @departmentid, now(), now()
                 );
-                INSERT INTO positionstaff (
-                    createdAt, updatedAt, StaffFileId, PositionId
-                )
-                VALUES (
-                    now(), now(), @staffid, @positionid
-                )`)
+				`)
 				return
 			}
 		}
@@ -244,31 +227,29 @@ export default class StaffFileQueryRoutes {
 	}
 
 	async onLeave(discordId: string): Promise<number | null> {
-		onLeave: {
 			let bool = (
-				await dbSql.query(`SELECT outOfOffice FROM stafffiles WHERE id=(SELECT StaffFileId from discordinfos WHERE discordId='${discordId}')`, { type: QueryTypes.SELECT })
+				await dbSql.query(`SELECT outOfOffice FROM stafffiles WHERE discordId=${discordId}`, { type: QueryTypes.SELECT })
 			)[0] as StaffFile
 			if (!bool) {
 				return null;
 			}
 			return bool.outOfOffice
-		}
 	}
 
 	async setLeave(discordId: string, status: boolean): Promise<void> {
 		dbSql.query(`UPDATE stafffiles
 		SET outOfOffice = ${status == true ? 1 : 0}
-		WHERE id = (SELECT StaffFileId FROM discordinfos WHERE discordId='${discordId}')`)
+		WHERE discordId=${discordId}`)
 		return
 	}
 
 	async getMessages(discordId: string) {
-		let records = await dbSql.query(`SELECT * FROM messages WHERE StaffFileId=(SELECT StaffFileId FROM discordinfos WHERE discordId=${discordId})`, { type: QueryTypes.SELECT })
+		let records = await dbSql.query(`SELECT * FROM messages WHERE StaffFileId=(SELECT id FROM stafffiles WHERE discordId=${discordId})`, { type: QueryTypes.SELECT })
 		return records
 	}
 
 	async dropMessages(discordId: string) {
-		await dbSql.query(`DELETE FROM messages WHERE StaffFileId=(SELECT StaffFileId FROM discordinfos WHERE discordId=${discordId})`)
+		await dbSql.query(`DELETE FROM messages WHERE StaffFileId=(SELECT id FROM stafffiles WHERE discordId=${discordId})`)
 	}
 
 	async getStaffBySupervisor(supervisorId: number) {
