@@ -2,3 +2,4 @@ node_modules
 .dccache
 demo.ts
 .env
+.DS_Store
