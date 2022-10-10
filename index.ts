@@ -412,6 +412,7 @@ app.listen(3000, () => {
 client.once("ready", async () => {
 	// undeploy()
 	deploy()
+	await BootCheck.checkUpdate(client)
 	log.success(`Readied in ${sw.stop().toString()}!`)
 })
 
