@@ -1,6 +1,5 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
-import { StaffFile as File } from ".."
 import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
 import Query from "./query"
 

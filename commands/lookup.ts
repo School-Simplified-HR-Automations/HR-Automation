@@ -88,7 +88,40 @@ module.exports = {
                         }
                     )
                 if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                await interaction.editReply({ embeds: [embed] })
+                const menu = new SelectMenuBuilder().addOptions(
+                    {
+                        label: "Position History",
+                        description: `${staff.name}'s history at School Simplified.`,
+                        value: `phos-${staff.id}`
+                    },
+                    {
+                        label: "Break Records",
+                        description: `${staff.name}'s break records.`,
+                        value: `breaks-${staff.id}`
+                    },
+                    {
+                        label: "Strike Records",
+                        description: `${staff.name}'s strike records.`,
+                        value: `strikes-${staff.id}`
+                    },
+                    {
+                        label: "Censure Records",
+                        description: `${staff.name}'s censure records.`,
+                        value: `censures-${staff.id}`
+                    },
+                    {
+                        label: "PIP Records",
+                        description: `${staff.name}'s PIP records.`,
+                        value: `pips-${staff.id}`
+                    }
+                )
+                const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                if (userpermit >= 1) {
+                    const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
+                    await interaction.editReply({ embeds: [embed], components: [row] })
+                } else {
+                    await interaction.editReply({ embeds: [embed] })
+                }
             }
             else if (interaction.options.getString("filter") == "lname") {
                 const lname = interaction.options.getString("query")?.split(" ")[0]
@@ -167,7 +200,40 @@ module.exports = {
                             }
                         )
                     if (retstaff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                    await interaction.editReply({ embeds: [embed] })
+                    const menu = new SelectMenuBuilder().addOptions(
+                        {
+                            label: "Position History",
+                            description: `${retstaff.name}'s history at School Simplified.`,
+                            value: `phos-${retstaff.id}`
+                        },
+                        {
+                            label: "Break Records",
+                            description: `${retstaff.name}'s break records.`,
+                            value: `breaks-${retstaff.id}`
+                        },
+                        {
+                            label: "Strike Records",
+                            description: `${retstaff.name}'s strike records.`,
+                            value: `strikes-${retstaff.id}`
+                        },
+                        {
+                            label: "Censure Records",
+                            description: `${retstaff.name}'s censure records.`,
+                            value: `censures-${retstaff.id}`
+                        },
+                        {
+                            label: "PIP Records",
+                            description: `${retstaff.name}'s PIP records.`,
+                            value: `pips-${retstaff.id}`
+                        }
+                    )
+                    const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                    if (userpermit >= 1) {
+                        const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
+                        await interaction.editReply({ embeds: [embed], components: [row] })
+                    } else {
+                        await interaction.editReply({ embeds: [embed] })
+                    }
                 }
 
             }
@@ -248,7 +314,40 @@ module.exports = {
                             }
                         )
                     if (retstaff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                    await interaction.editReply({ embeds: [embed] })
+                    const menu = new SelectMenuBuilder().addOptions(
+                        {
+                            label: "Position History",
+                            description: `${retstaff.name}'s history at School Simplified.`,
+                            value: `phos-${retstaff.id}`
+                        },
+                        {
+                            label: "Break Records",
+                            description: `${retstaff.name}'s break records.`,
+                            value: `breaks-${retstaff.id}`
+                        },
+                        {
+                            label: "Strike Records",
+                            description: `${retstaff.name}'s strike records.`,
+                            value: `strikes-${retstaff.id}`
+                        },
+                        {
+                            label: "Censure Records",
+                            description: `${retstaff.name}'s censure records.`,
+                            value: `censures-${retstaff.id}`
+                        },
+                        {
+                            label: "PIP Records",
+                            description: `${retstaff.name}'s PIP records.`,
+                            value: `pips-${retstaff.id}`
+                        }
+                    )
+                    const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                    if (userpermit >= 1) {
+                        const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
+                        await interaction.editReply({ embeds: [embed], components: [row] })
+                    } else {
+                        await interaction.editReply({ embeds: [embed] })
+                    }
                 }
 
             }
@@ -313,7 +412,40 @@ module.exports = {
                         }
                     )
                 if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                await interaction.editReply({ embeds: [embed] })
+                const menu = new SelectMenuBuilder().addOptions(
+                    {
+                        label: "Position History",
+                        description: `${staff.name}'s history at School Simplified.`,
+                        value: `phos-${staff.id}`
+                    },
+                    {
+                        label: "Break Records",
+                        description: `${staff.name}'s break records.`,
+                        value: `breaks-${staff.id}`
+                    },
+                    {
+                        label: "Strike Records",
+                        description: `${staff.name}'s strike records.`,
+                        value: `strikes-${staff.id}`
+                    },
+                    {
+                        label: "Censure Records",
+                        description: `${staff.name}'s censure records.`,
+                        value: `censures-${staff.id}`
+                    },
+                    {
+                        label: "PIP Records",
+                        description: `${staff.name}'s PIP records.`,
+                        value: `pips-${staff.id}`
+                    }
+                )
+                const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                if (userpermit >= 1) {
+                    const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
+                    await interaction.editReply({ embeds: [embed], components: [row] })
+                } else {
+                    await interaction.editReply({ embeds: [embed] })
+                }
             }
             else await interaction.editReply("{}")
         } catch (err) {
