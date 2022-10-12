@@ -1,4 +1,4 @@
-export default function sanitizer(type: "number" | "StaffFileId" | "name" | "discordId" | "timestamp" | "discordUser" | "date" | "link", ...args: string[]): void {
+export default function sanitizer(type: "number" | "StaffFileId" | "name" | "discordId" | "timestamp" | "discordUser" | "date" | "link" | "bearer", ...args: string[]): void {
     let pass = true
     switch (type) {
         case "number":
@@ -50,6 +50,21 @@ export default function sanitizer(type: "number" | "StaffFileId" | "name" | "dis
                 if (!args[i].match(linkreg)) pass = false
             }
             break;
+        case "bearer":
+            const bearerreg = new RegExp(/^[a-zA-Z0-9-]+$/, "gmu")
+            for (let i = 0; i < args.length; i++) {
+                if (!args[i].match(bearerreg)) pass = false
+            }
+            break;
     }
-    if (!pass) throw new Error("Security: Input did not pass sanitization.")
+    class SecurityError extends Error {
+        constructor(message: string) {
+            super(message)
+            this.name = "SecurityError"
+        }
+    }
+
+    if (!pass) {
+        throw new SecurityError("Security: Input did not pass sanitization.")
+    }
 }
