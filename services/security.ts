@@ -270,6 +270,11 @@ export class Security {
 			})
 	}
 
+    /**
+     * Preforms a basic developer check.
+     * @deprecated Will be privated in the next version to prevent avoiding use of the security module. A new <Security>.isDeveloper check will be added.
+     * @param user the user to check
+     */
 	public static async basicDevCheck(user: User) {
 		if (
 			user.id !== process.env.DEVELOPER_1_ID &&
