@@ -119,13 +119,23 @@ export default function model() {
             allowNull: true,
         },
         joined: {
-            type: DataTypes.DATE,
+            type: DataTypes.STRING,
             allowNull: false,
         },
         quit: {
-            type: DataTypes.DATE,
+            type: DataTypes.STRING,
             allowNull: true,
         },
+        terms: {
+            type: DataTypes.SMALLINT,
+            allowNull: false,
+            defaultValue: 1
+        },
+        reason: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: "No reason provided."
+        }
     })
     const Position = dbSql.define("Position", {
         title: {
@@ -210,30 +220,31 @@ export default function model() {
     })
 
     const Record = dbSql.define("records", {
-        StaffFileRec: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
         StaffFileAdm: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
         date: {
-            type: DataTypes.DATE,
+            type: DataTypes.STRING,
             allowNull: false
         },
         dateExp: {
-            type: DataTypes.DATE,
+            type: DataTypes.STRING,
             allowNull: true
         },
         reason: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true,
+            defaultValue: "No reason provided."
         },
         detailLink: {
             type: DataTypes.STRING,
             allowNull: true
         },
+        recordType: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        }
     })
 
     // Association Section
@@ -279,11 +290,8 @@ export default function model() {
 
     // Others
 
-    Position.hasMany(PositionHistory)
-    PositionHistory.belongsTo(Position)
-
-    Department.hasMany(PositionHistory)
-    PositionHistory.belongsTo(Department)
+    PositionInfo.hasMany(PositionHistory)
+    PositionHistory.belongsTo(PositionInfo)
 
     Position.belongsTo(Department)
     Department.hasMany(Position)
