@@ -39,19 +39,15 @@ module.exports = {
                 const todayString = `${todayYear}-${todayMonth + 1}-${todayDate}`
                 let expObj
                 if (todayMonth <= 1 && todayDate < 28) {
-                    console.log("EXECUTING BLOCK 1")
                     let year
                     if (todayMonth == 11 && todayDate >= 1) year = todayYear + 1
                     else year = todayYear
                     expObj = new Date(year, 2, 30)
                 } else if (todayMonth <= 4 && todayDate < 30) {
-                    console.log("EXECUTING BLOCK 2")
                     expObj = new Date(todayYear, 5, 30)
                 } else if (todayMonth <= 7 && todayDate < 30) {
-                    console.log("EXECUTING BLOCK 3")
                     expObj = new Date(todayYear, 8, 30)
                 } else {
-                    console.log("EXECUTING BLOCK 4")
                     expObj = new Date(todayYear, 11, 31)
                 }
                 let expString = `${expObj.getFullYear()}-${expObj.getMonth() + 1}-${expObj.getDate()}`
