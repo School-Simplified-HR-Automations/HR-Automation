@@ -4,6 +4,7 @@ interface Position {
 	createdAt: any
 	updatedAt: any
 	DepartmentId: number
+	TeamId: number
 }
 
 interface Department {
@@ -85,6 +86,31 @@ interface Permit {
 	permit: number
 }
 
+interface Record {
+	StaffFileAdm: number,
+	date: number,
+	dateExp: number,
+	reason: string,
+	detailLink: string,
+	createdAt: string,
+	updatedAt: string,
+	StaffFileId: number,
+	type: number
+}
+
+interface PositionHistory {
+	id: number
+	title: string
+	dept: string
+	team: string
+	joined: string
+	quit: string | null
+	StaffFileId: number
+	positionInfoId: number
+	terms: number
+	reason: string
+}
+
 interface StaffFileArray extends Array<StaffFile> { }
 
-export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord, Supervisor, Permit }
+export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord, Supervisor, Permit, Record, PositionHistory }
