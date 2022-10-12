@@ -2,6 +2,7 @@ import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
 import { Department, DepartmentTableRecord } from "../types/common/ReturnTypes"
 import queryBuilder from "../utils/queryBuilder"
+import sanitizer from "../utils/sanitizer"
 
 export default class DepartmentQueryRoutes {
     async getDepartment(filter: {
@@ -14,14 +15,17 @@ export default class DepartmentQueryRoutes {
         let namequery: string | null
         let filters: string[] = []
         if (filter.id) {
+            sanitizer("number", `${filter.id}`)
             idquery = `id = ${filter.id}`
             filters.push(idquery)
         } else idquery = null
         if (filter.SupervisorId) {
+            sanitizer("number", `${filter.SupervisorId}`)
             supervisorquery = `SupervisorId = ${filter.SupervisorId}`
             filters.push(supervisorquery)
         } else supervisorquery = null
         if (filter.name) {
+            sanitizer("name", filter.name)
             namequery = `name = '${filter.name}'`
             filters.push(namequery)
         } else namequery = null
@@ -30,6 +34,7 @@ export default class DepartmentQueryRoutes {
     }
 
     async getDepartmentStaff(id: number) {
+        sanitizer("number", `${id}`)
         let res = (await dbSql.query(`SELECT DepartmentId FROM positioninfos WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as DepartmentTableRecord[])
         let ret: string[] = [];
         for (let i = 0; i < res.length; i++) {

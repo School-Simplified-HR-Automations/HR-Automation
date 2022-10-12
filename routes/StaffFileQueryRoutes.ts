@@ -1,6 +1,7 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
 import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
+import sanitizer from "../utils/sanitizer"
 import Query from "./query"
 
 /**
@@ -17,6 +18,7 @@ export default class StaffFileQueryRoutes {
 		firstName: string,
 		lastName: string
 	): Promise<StaffFile> {
+		sanitizer("name", firstName, lastName)
 		return (
 			await dbSql.query(
 				`SELECT * FROM stafffiles WHERE name = '${firstName} ${lastName}'`,
@@ -30,6 +32,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Array of Staff File Objects
 	 */
 	async getStaffByFirstName(name: string): Promise<StaffFile[]> {
+		sanitizer("name", name)
 		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '${name}%'`, {
 			type: QueryTypes.SELECT,
 		})
@@ -40,6 +43,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Array of Staff File Objects
 	 */
 	async getStaffByLastName(name: string): Promise<StaffFile[]> {
+		sanitizer("name", name)
 		return dbSql.query(`SELECT * FROM stafffiles WHERE name LIKE '% ${name}%'`, {
 			type: QueryTypes.SELECT,
 		})
@@ -50,6 +54,7 @@ export default class StaffFileQueryRoutes {
 	 * @returns Staff File Object
 	 */
 	async getStaffById(id: number): Promise<StaffFile> {
+		sanitizer("number", `${id}`)
 		return (
 			await dbSql.query(`SELECT * FROM stafffiles WHERE id = ${id}`, {
 				type: QueryTypes.SELECT,
@@ -88,8 +93,7 @@ export default class StaffFileQueryRoutes {
 	 */
 	async getTeamByStaffTeam(staff: object): Promise<Team> {
 		return (await dbSql.query(
-			`SELECT * FROM teams WHERE id = (SELECT TeamId FROM stafffiles WHERE id = ${
-				(staff as StaffFile).id
+			`SELECT * FROM teams WHERE id = (SELECT TeamId FROM stafffiles WHERE id = ${(staff as StaffFile).id
 			})`,
 			{ type: QueryTypes.SELECT }))[0] as Team // TODO
 	}
@@ -108,10 +112,9 @@ export default class StaffFileQueryRoutes {
 	 */
 	async getPositionByStaffPosition(staff: object): Promise<Position> {
 		return (await dbSql.query(
-			`SELECT * FROM positions WHERE id = (SELECT PositionId FROM stafffiles WHERE id = ${
-				(staff as StaffFile).id
+			`SELECT * FROM positions WHERE id = (SELECT PositionId FROM stafffiles WHERE id = ${(staff as StaffFile).id
 			})`,
-		{ type: QueryTypes.SELECT }))[0] as Position
+			{ type: QueryTypes.SELECT }))[0] as Position
 	}
 
 	async createStaffFile(
@@ -135,8 +138,11 @@ export default class StaffFileQueryRoutes {
 			| "Awaiting Server Entry"
 			| "Onboarding Phase"
 	): Promise<void> {
+		sanitizer("name", fullName, departmentName, positionName, discordUser)
+		sanitizer("discordId", discordId)
 		if (appStatus) {
 			if (teamName) {
+				sanitizer("name", teamName)
 				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
@@ -177,6 +183,7 @@ export default class StaffFileQueryRoutes {
 			}
 		} else {
 			if (teamName) {
+				sanitizer("name", teamName)
 				dbSql.query(`SET @departmentid = (SELECT id FROM departments WHERE name = '${departmentName}');
                 SET @positionid = (SELECT id FROM positions WHERE title = '${positionName}');
                 SET @teamid = (SELECT id FROM teams WHERE name = '${teamName}');
@@ -219,6 +226,7 @@ export default class StaffFileQueryRoutes {
 	}
 
 	async assignSupervisor(fullName: string, title: string): Promise<void> {
+		sanitizer('name', fullName, title)
 		dbSql.query(`UPDATE supervisors
         SET StaffFileId = (SELECT id FROM stafffiles WHERE name = '${fullName}')
         WHERE title = '${title}'`)
@@ -226,16 +234,18 @@ export default class StaffFileQueryRoutes {
 	}
 
 	async onLeave(discordId: string): Promise<number | null> {
-			let bool = (
-				await dbSql.query(`SELECT outOfOffice FROM stafffiles WHERE discordId=${discordId}`, { type: QueryTypes.SELECT })
-			)[0] as StaffFile
-			if (!bool) {
-				return null;
-			}
-			return bool.outOfOffice
+		sanitizer("discordId", discordId)
+		let bool = (
+			await dbSql.query(`SELECT outOfOffice FROM stafffiles WHERE discordId=${discordId}`, { type: QueryTypes.SELECT })
+		)[0] as StaffFile
+		if (!bool) {
+			return null;
+		}
+		return bool.outOfOffice
 	}
 
 	async setLeave(discordId: string, status: boolean): Promise<void> {
+		sanitizer("discordId", discordId)
 		dbSql.query(`UPDATE stafffiles
 		SET outOfOffice = ${status == true ? 1 : 0}
 		WHERE discordId=${discordId}`)
@@ -243,16 +253,51 @@ export default class StaffFileQueryRoutes {
 	}
 
 	async getMessages(discordId: string) {
+		sanitizer("discordId", discordId)
 		let records = await dbSql.query(`SELECT * FROM messages WHERE StaffFileId=(SELECT id FROM stafffiles WHERE discordId=${discordId})`, { type: QueryTypes.SELECT })
 		return records
 	}
 
 	async dropMessages(discordId: string) {
+		sanitizer("discordId", discordId)
 		await dbSql.query(`DELETE FROM messages WHERE StaffFileId=(SELECT id FROM stafffiles WHERE discordId=${discordId})`)
 	}
 
 	async getStaffBySupervisor(supervisorId: number) {
+		sanitizer("number", `${supervisorId}`)
 		let ret: StaffFile = (await this.getStaffById((await Query.supervisors.getSupervisorById(supervisorId)).StaffFileId))
 		return ret
+	}
+
+	async addReprimand(date: number, dateExp: number, reason: string, id: number, type: 1 | 2, admin: number, detailLink?: string) {
+		console.log(`${date}, ${dateExp}, ${reason}, ${id}, ${type}, ${admin}`)
+		sanitizer("timestamp", `${date}`, `${dateExp}`)
+		console.log("Date passed")
+		sanitizer("name", reason)
+		console.log("Name passed")
+		sanitizer("number", `${id}`, `${admin}`)
+		console.log("Number passed")
+		
+		if (detailLink) {
+			sanitizer('link', detailLink)
+			await dbSql.query(`INSERT INTO records
+			(StaffFileAdm, date, dateExp, reason, detailLink, createdAt, updatedAt, StaffFileId, recordType)
+			VALUES (${admin}, '${date}', '${dateExp}', '${reason}', '${detailLink}', now(), now(), ${id}, ${type})`)
+		} else {
+			await dbSql.query(`INSERT INTO records
+			(StaffFileAdm, date, dateExp, reason, createdAt, updatedAt, StaffFileId, recordType)
+			VALUES (${admin}, '${date}', '${dateExp}', '${reason}', now(), now(), ${id}, ${type})`)
+		}
+		if (type == 1) {
+			await dbSql.query(`SET @strikes = (SELECT strikes FROM stafffiles WHERE id = ${id});
+			UPDATE stafffiles
+			SET strikes = @strikes + 1
+			WHERE id = ${id}`)
+		} else if (type == 2) {
+			await dbSql.query(`SET @censures = (SELECT censures FROM stafffiles WHERE id = ${id});
+			UPDATE stafffiles
+			SET censures = @censures + 1
+			WHERE id = ${id}`)
+		}
 	}
 }

@@ -7,7 +7,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js"
 import { QueryTypes } from "sequelize"
-import { dbSql, Department, StaffFile, Team } from ".."
+import { dbSql } from ".."
 import {
 	Department as DepartmentType,
 	Position,
@@ -177,7 +177,6 @@ module.exports = {
 				  `
 					)
 					.catch((err) => {
-						console.log(err)
 						return interaction.editReply({
 							embeds: [
 								new EmbedBuilder()
