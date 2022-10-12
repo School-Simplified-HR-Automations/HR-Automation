@@ -36,6 +36,12 @@ export default class PositionHistoriesQueryRoutes {
             await dbSql.query(`UPDATE positionhistories
             SET positioninfoId = ${newrowid}
             WHERE (StaffFileId = ${id} AND title = '${position.title}')`)
+            const supervisor = await Query.supervisors.getSupervisorById(position.id)
+            if (supervisor.length > 0) {
+                await dbSql.query(`UPDATE supervisors
+                SET StaffFileId = ${id}
+                WHERE id = ${position.id}`)
+            }
             return 0
         } else {
             schedule.scheduleJob(joinDate, async function () {
@@ -46,6 +52,12 @@ export default class PositionHistoriesQueryRoutes {
                 await dbSql.query(`UPDATE positionhistories
             SET positioninfoId = ${newrowid}
             WHERE (StaffFileId = ${id} AND title = '${position.title}')`)
+                const supervisor = await Query.supervisors.getSupervisorById(position.id)
+                if (supervisor.length > 0) {
+                    await dbSql.query(`UPDATE supervisors
+                SET StaffFileId = ${id}
+                WHERE id = ${position.id}`)
+                }
             })
             return Math.round(joinDate.getTime() / 1000)
         }

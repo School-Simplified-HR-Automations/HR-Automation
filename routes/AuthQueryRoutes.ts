@@ -48,5 +48,5 @@ export default class AuthQueryRoutes {
         if (userperm < 10 && id !== user) throw new Error("Access Forbidden: Permit 10 required to assign new auth certificates.")
         await dbSql.query(`INSERT INTO apiauths (authid, admin, backup, createdAt, updatedAt, permit) VALUES ('${id}', '${user}', '${uuid()}', now(), now(), ${permitlvl})`, { type: QueryTypes.INSERT })
         return
-    }
+    } 
 }

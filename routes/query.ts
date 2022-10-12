@@ -1,5 +1,6 @@
 import AuthQueryRoutes from "./AuthQueryRoutes";
 import DepartmentQueryRoutes from "./DepartmentQueryRoutes";
+import InternalQueryRoutes from "./InternalQueryRoutes";
 import PositionHistoriesQueryRoutes from "./PositionHistoriesQueryRoutes";
 import PositionQueryRoutes from "./PositionQueryRoutes";
 import RecordQueryRoutes from "./RecordQueryRoutes";
@@ -20,4 +21,5 @@ export default class Query {
     static auth = new AuthQueryRoutes()
     static records = new RecordQueryRoutes()
     static positionHistory = new PositionHistoriesQueryRoutes()
+    static internal = new InternalQueryRoutes()
 }
