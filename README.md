@@ -7,11 +7,11 @@ The SS HR bot is a project from Blizzy and net-tech- to simplify and streamline 
 
 Before you want to change anything or want to make a new feature *always pull first*. Then, make a *new* branch for the feature you are making.
 
-### Contibuting rules
-1. Always pull first
+### Contributing rules
+1. Always pull first.
 2. Only use the default VSCode formatter "TypeScript and JavaScript Language Features".
 3. Make a new branch for each feature you make.
-4. Split things up into smaller commits
+4. Split things up into smaller commits.
 > Example:
 > If someone wanted to add a eval and execute command which would require a security service they should first push the security service, then eval, and then execute.
 5. Before moving files around or changing essential files coordinate with others. 
