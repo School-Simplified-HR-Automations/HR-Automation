@@ -10,7 +10,7 @@ module.exports = {
             await interaction.deferReply()
 
         } catch (err) {
-            sendError(err, interaction, false)
+            sendError(err, interaction, true)
         }
 	},
 }
