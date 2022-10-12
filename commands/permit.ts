@@ -9,7 +9,8 @@ module.exports = {
         .setDescription("You don't need this.")
         .addStringOption(opt => opt.setName("user-id").setDescription("The Discord User ID of the target.").setRequired(true))
         .addNumberOption(opt => opt.setName("permit").setDescription("The permit level you want to set.").setRequired(true)),
-    async execute(interaction: ChatInputCommandInteraction) {
+    permit: 10,
+    async execute(interaction: ChatInputCommandInteraction, permit: number) {
         try {
             await interaction.deferReply()
             if (interaction.options.getNumber("permit") as number > 6 && interaction.options.getNumber("permit") as number < 10) {

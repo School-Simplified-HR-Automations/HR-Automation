@@ -6,7 +6,8 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("sync")
 		.setDescription("You don't need this."),
-	async execute(interaction: ChatInputCommandInteraction) {
+	permit: 10,
+	async execute(interaction: ChatInputCommandInteraction, permit: number) {
 		const sw = new Stopwatch().start()
 		interaction.deferReply()
 		if (!(interaction.user.id == "413462464022446084")) return

@@ -51,7 +51,8 @@ module.exports = {
 				.setDescription("Opt -> is the target a supervisor?")
 				.setRequired(false)
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	permit: 3,
+	async execute(interaction: ChatInputCommandInteraction, permit: number) {
 		try {
 			const sw = new Stopwatch().start()
 			const fullname = interaction.options.getString("full-name") as string
@@ -92,7 +93,6 @@ module.exports = {
 									})
 								})
 								.catch((err: Error) => {
-									console.log(err)
 									return interaction.editReply({
 										embeds: [
 											new EmbedBuilder()
@@ -115,7 +115,6 @@ module.exports = {
 						}
 					})
 					.catch((err: Error) => {
-						console.log(err)
 						return interaction.editReply({
 							embeds: [
 								new EmbedBuilder()
@@ -151,7 +150,6 @@ module.exports = {
 									})
 								})
 								.catch((err: Error) => {
-									console.log(err)
 									return interaction.editReply({
 										embeds: [
 											new EmbedBuilder()
@@ -174,7 +172,6 @@ module.exports = {
 						}
 					})
 					.catch((err: Error) => {
-						console.log(err)
 						return interaction.editReply({
 							embeds: [
 								new EmbedBuilder()

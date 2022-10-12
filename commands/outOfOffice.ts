@@ -9,7 +9,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("on-leave")
         .setDescription("Set or return from Out of Office Hours."),
-    async execute(interaction: ChatInputCommandInteraction) {
+    permit: 0,
+    async execute(interaction: ChatInputCommandInteraction, permit: number) {
         try {
             let status = await Query.staff.onLeave(interaction.user.id)
             if (status !== 1) {

@@ -28,7 +28,8 @@ module.exports = {
             }
         ).setRequired(true))
         .addStringOption(c => c.setName("query").setDescription("Search query.").setRequired(true)),
-    async execute(interaction: ChatInputCommandInteraction) {
+    permit: 0,
+    async execute(interaction: ChatInputCommandInteraction, permit: number) {
         try {
             await interaction.deferReply()
             if (interaction.options.getString("filter") == "full-name") {
@@ -42,23 +43,36 @@ module.exports = {
                 const embed = new EmbedBuilder().setTitle(staff.name)
                 let descstr = ""
                 let posarr = await Query.positions.getPositionStaff(staff.id)
-                for (let i = 0; i < posarr.length; i++) {
-                    descstr += `*${posarr[i]}*\n`
-                }
+                if (posarr.length > 0) {
+                    for (let i = 0; i < posarr.length; i++) {
+                        descstr += `*${posarr[i]}*\n`
+                    }
+                } else descstr = "No position."
                 embed.setDescription(`${descstr}`)
                 let deptteams = ""
                 let supsstr = ""
                 let deptarr = await Query.departments.getDepartmentStaff(staff.id)
-                console.log(deptarr)
                 let teamarr = await Query.teams.getTeamStaff(staff.id)
-                console.log(teamarr)
-                for (let i = 0; i < deptarr.length; i++) {
-                    let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
-                    deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
-                    console.log(team.SupervisorId)
-                    if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
-                        supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                if (deptarr.length > 0 && teamarr.length > 0) {
+                    for (let i = 0; i < deptarr.length; i++) {
+                        let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                        deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                        if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                            supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                        }
                     }
+                } else {
+                    deptteams = "None"
+                    supsstr = ""
+                }
+                let outOfOffice = 0
+                let returnDate;
+                let breakRecord = (await Query.records.getBreakRecords(`${staff.id}`))
+                if (breakRecord.length > 0) {
+                    outOfOffice = 2
+                    returnDate = breakRecord[0].dateExp
+                } else if (staff.outOfOffice) {
+                    outOfOffice = 1
                 }
                 embed
                     .addFields(
@@ -83,12 +97,12 @@ module.exports = {
                         },
                         {
                             name: "On Leave?",
-                            value: `${staff.outOfOffice ? "True" : "False"}`,
+                            value: `${outOfOffice == 2 ? `On break until <t:${returnDate}:d>` : outOfOffice == 1 ? 'In Out of Office mode.' : "False"}`,
                             inline: true
                         }
                     )
                 if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                const menu = new SelectMenuBuilder().addOptions(
+                const menu = new SelectMenuBuilder().setCustomId(`hist-${staff.id}`).addOptions(
                     {
                         label: "Position History",
                         description: `${staff.name}'s history at School Simplified.`,
@@ -108,15 +122,10 @@ module.exports = {
                         label: "Censure Records",
                         description: `${staff.name}'s censure records.`,
                         value: `censures-${staff.id}`
-                    },
-                    {
-                        label: "PIP Records",
-                        description: `${staff.name}'s PIP records.`,
-                        value: `pips-${staff.id}`
                     }
                 )
-                const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
-                if (userpermit >= 1) {
+                const permit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                if (permit >= 1) {
                     const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
                     await interaction.editReply({ embeds: [embed], components: [row] })
                 } else {
@@ -144,9 +153,9 @@ module.exports = {
                         )
                     }
                     const row = new ActionRowBuilder<SelectMenuBuilder>()
-                    .addComponents(
-                        menu
-                    )
+                        .addComponents(
+                            menu
+                        )
                     return interaction.editReply({ embeds: [embed], components: [row] })
                 } else {
                     let retstaff = staff[0]
@@ -154,23 +163,36 @@ module.exports = {
                     const embed = new EmbedBuilder().setTitle(retstaff.name)
                     let descstr = ""
                     let posarr = await Query.positions.getPositionStaff(retstaff.id)
-                    for (let i = 0; i < posarr.length; i++) {
-                        descstr += `*${posarr[i]}*\n`
-                    }
+                    if (posarr.length > 0) {
+                        for (let i = 0; i < posarr.length; i++) {
+                            descstr += `*${posarr[i]}*\n`
+                        }
+                    } else descstr = "No position."
                     embed.setDescription(`${descstr}`)
                     let deptteams = ""
                     let supsstr = ""
                     let deptarr = await Query.departments.getDepartmentStaff(retstaff.id)
-                    console.log(deptarr)
                     let teamarr = await Query.teams.getTeamStaff(retstaff.id)
-                    console.log(teamarr)
-                    for (let i = 0; i < deptarr.length; i++) {
-                        let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
-                        deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
-                        console.log(team.SupervisorId)
-                        if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
-                            supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                    if (deptarr.length > 0 && teamarr.length > 0) {
+                        for (let i = 0; i < deptarr.length; i++) {
+                            let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                            deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                            if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                                supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                            }
                         }
+                    } else {
+                        deptteams = "None"
+                        supsstr = ""
+                    }
+                    let outOfOffice = 0
+                    let returnDate;
+                    let breakRecord = (await Query.records.getBreakRecords(`${retstaff.id}`))
+                    if (breakRecord.length > 0) {
+                        outOfOffice = 2
+                        returnDate = breakRecord[0].dateExp
+                    } else if (retstaff.outOfOffice) {
+                        outOfOffice = 1
                     }
                     embed
                         .addFields(
@@ -195,12 +217,12 @@ module.exports = {
                             },
                             {
                                 name: "On Leave?",
-                                value: `${retstaff.outOfOffice ? "True" : "False"}`,
+                                value: `${outOfOffice == 2 ? `On break until <t:${returnDate}:d>` : outOfOffice == 1 ? 'In Out of Office mode.' : "False"}`,
                                 inline: true
                             }
                         )
                     if (retstaff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                    const menu = new SelectMenuBuilder().addOptions(
+                    const menu = new SelectMenuBuilder().setCustomId(`hist-${retstaff.id}`).addOptions(
                         {
                             label: "Position History",
                             description: `${retstaff.name}'s history at School Simplified.`,
@@ -220,15 +242,10 @@ module.exports = {
                             label: "Censure Records",
                             description: `${retstaff.name}'s censure records.`,
                             value: `censures-${retstaff.id}`
-                        },
-                        {
-                            label: "PIP Records",
-                            description: `${retstaff.name}'s PIP records.`,
-                            value: `pips-${retstaff.id}`
                         }
                     )
-                    const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
-                    if (userpermit >= 1) {
+                    const permit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                    if (permit >= 1) {
                         const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
                         await interaction.editReply({ embeds: [embed], components: [row] })
                     } else {
@@ -258,9 +275,9 @@ module.exports = {
                         )
                     }
                     const row = new ActionRowBuilder<SelectMenuBuilder>()
-                    .addComponents(
-                        menu
-                    )
+                        .addComponents(
+                            menu
+                        )
                     return interaction.editReply({ embeds: [embed], components: [row] })
                 } else {
                     let retstaff = staff[0]
@@ -268,23 +285,36 @@ module.exports = {
                     const embed = new EmbedBuilder().setTitle(retstaff.name)
                     let descstr = ""
                     let posarr = await Query.positions.getPositionStaff(retstaff.id)
-                    for (let i = 0; i < posarr.length; i++) {
-                        descstr += `*${posarr[i]}*\n`
-                    }
+                    if (posarr.length > 0) {
+                        for (let i = 0; i < posarr.length; i++) {
+                            descstr += `*${posarr[i]}*\n`
+                        }
+                    } else descstr = "No position."
                     embed.setDescription(`${descstr}`)
                     let deptteams = ""
                     let supsstr = ""
                     let deptarr = await Query.departments.getDepartmentStaff(retstaff.id)
-                    console.log(deptarr)
                     let teamarr = await Query.teams.getTeamStaff(retstaff.id)
-                    console.log(teamarr)
-                    for (let i = 0; i < deptarr.length; i++) {
-                        let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
-                        deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
-                        console.log(team.SupervisorId)
-                        if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
-                            supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                    if (deptarr.length > 0 && teamarr.length > 0) {
+                        for (let i = 0; i < deptarr.length; i++) {
+                            let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                            deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                            if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                                supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                            }
                         }
+                    } else {
+                        deptteams = "None"
+                        supsstr = ""
+                    }
+                    let outOfOffice = 0
+                    let returnDate;
+                    let breakRecord = (await Query.records.getBreakRecords(`${retstaff.id}`))
+                    if (breakRecord.length > 0) {
+                        outOfOffice = 2
+                        returnDate = breakRecord[0].dateExp
+                    } else if (retstaff.outOfOffice) {
+                        outOfOffice = 1
                     }
                     embed
                         .addFields(
@@ -309,12 +339,12 @@ module.exports = {
                             },
                             {
                                 name: "On Leave?",
-                                value: `${retstaff.outOfOffice ? "True" : "False"}`,
+                                value: `${outOfOffice == 2 ? `On break until <t:${returnDate}:d>` : outOfOffice == 1 ? 'In Out of Office mode.' : "False"}`,
                                 inline: true
                             }
                         )
                     if (retstaff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                    const menu = new SelectMenuBuilder().addOptions(
+                    const menu = new SelectMenuBuilder().setCustomId(`hist-${retstaff.id}`).addOptions(
                         {
                             label: "Position History",
                             description: `${retstaff.name}'s history at School Simplified.`,
@@ -334,20 +364,16 @@ module.exports = {
                             label: "Censure Records",
                             description: `${retstaff.name}'s censure records.`,
                             value: `censures-${retstaff.id}`
-                        },
-                        {
-                            label: "PIP Records",
-                            description: `${retstaff.name}'s PIP records.`,
-                            value: `pips-${retstaff.id}`
                         }
                     )
-                    const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
-                    if (userpermit >= 1) {
+                    const permit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                    if (permit >= 1) {
                         const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
                         await interaction.editReply({ embeds: [embed], components: [row] })
                     } else {
                         await interaction.editReply({ embeds: [embed] })
                     }
+
                 }
 
             }
@@ -366,23 +392,36 @@ module.exports = {
                 const embed = new EmbedBuilder().setTitle(staff.name)
                 let descstr = ""
                 let posarr = await Query.positions.getPositionStaff(staff.id)
-                for (let i = 0; i < posarr.length; i++) {
-                    descstr += `*${posarr[i]}*\n`
-                }
+                if (posarr.length > 0) {
+                    for (let i = 0; i < posarr.length; i++) {
+                        descstr += `*${posarr[i]}*\n`
+                    }
+                } else descstr = "No position."
                 embed.setDescription(`${descstr}`)
                 let deptteams = ""
                 let supsstr = ""
                 let deptarr = await Query.departments.getDepartmentStaff(staff.id)
-                console.log(deptarr)
                 let teamarr = await Query.teams.getTeamStaff(staff.id)
-                console.log(teamarr)
-                for (let i = 0; i < deptarr.length; i++) {
-                    let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
-                    deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
-                    console.log(team.SupervisorId)
-                    if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
-                        supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                if (deptarr.length > 0 && teamarr.length > 0) {
+                    for (let i = 0; i < deptarr.length; i++) {
+                        let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
+                        deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
+                        if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
+                            supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
+                        }
                     }
+                } else {
+                    deptteams = "None"
+                    supsstr = ""
+                }
+                let outOfOffice = 0
+                let returnDate;
+                let breakRecord = (await Query.records.getBreakRecords(`${staff.id}`))
+                if (breakRecord.length > 0) {
+                    outOfOffice = 2
+                    returnDate = breakRecord[0].dateExp
+                } else if (staff.outOfOffice) {
+                    outOfOffice = 1
                 }
                 embed
                     .addFields(
@@ -407,12 +446,12 @@ module.exports = {
                         },
                         {
                             name: "On Leave?",
-                            value: `${staff.outOfOffice ? "True" : "False"}`,
+                            value: `${outOfOffice == 2 ? `On break until <t:${returnDate}:d>` : outOfOffice == 1 ? 'In Out of Office mode.' : "False"}`,
                             inline: true
                         }
                     )
                 if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-                const menu = new SelectMenuBuilder().addOptions(
+                const menu = new SelectMenuBuilder().setCustomId(`hist-${staff.id}`).addOptions(
                     {
                         label: "Position History",
                         description: `${staff.name}'s history at School Simplified.`,
@@ -432,23 +471,20 @@ module.exports = {
                         label: "Censure Records",
                         description: `${staff.name}'s censure records.`,
                         value: `censures-${staff.id}`
-                    },
-                    {
-                        label: "PIP Records",
-                        description: `${staff.name}'s PIP records.`,
-                        value: `pips-${staff.id}`
                     }
                 )
-                const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
-                if (userpermit >= 1) {
+                const permit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
+                if (permit >= 1) {
                     const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
                     await interaction.editReply({ embeds: [embed], components: [row] })
                 } else {
                     await interaction.editReply({ embeds: [embed] })
                 }
+
             }
             else await interaction.editReply("{}")
         } catch (err) {
+            console.log(err)
             sendError(err, interaction, true)
         }
     },
