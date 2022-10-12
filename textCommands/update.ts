@@ -1,42 +1,48 @@
 import { Message } from "discord.js"
 import { Security } from "../services/security"
+import { Timestamp } from "../utils/timestamp";
 const exec = (require("util").promisify((require("child_process").exec)));
 module.exports = {
 	name: "update",
 	description: "Updates the bot",
-	async execute(message: Message, args: string[]) {
-		await Security.isEvalerUser(message.author)
-			.then(async (result: any) => {
-				if (result.status !== 1) {
-					message.reply(
-						`\`\`\`diff\n-Security Service Error ${result.status}: ${result.message}\n\`\`\``
-					)
-					return
-				} else {
+	async execute(value?: Message | string) {
+		if (value && value instanceof Message) {
+			await Security.isEvalerUser(value.author)
+				.then(async (result: any) => {
+					if (result.status !== 1) {
+						value.reply(
+							`\`\`\`diff\n-Security Service Error ${result.status}: ${result.message}\n\`\`\``
+						)
+						return
+					} else {
+						let text = `**Updating ${value.client.user.username}**\n\n• ${Timestamp.generate("D", undefined, Date.now())} - Pulling from GitHub`
+						const updateMsg = await value.channel.send(text)
+						exec("git pull")
+							.then(async () => {
+								text += `\n• ${Timestamp.generate("D", undefined, Date.now())} - Pulled from GitHub`
+								await updateMsg.edit(text)
+							})
 
-					function discordTimestamp(timestamp: number) {
-						return `<t:${Math.round(timestamp / 1000)}:T>`
+						text += `\n• ${Timestamp.generate("D", undefined, Date.now())} - Restarting`
+						await updateMsg.edit(text)
+
+						const fs = require("fs")
+						const config = require("../config.json")
+						config.updated = true
+						config.updateMessageLink = updateMsg.url
+						fs.writeFileSync("./config.json", JSON.stringify(config, null, 4))
+
+						exec("pm2 restart all")
 					}
-
-					let text = `**Updating ${message.client.user.username}**\n\n• ${discordTimestamp(Date.now())} - Pulling from GitHub` 
-					const updateMsg = await message.channel.send(text)
-					exec("git pull")
-						.then(async () => {
-							text += `\n• ${discordTimestamp(Date.now())} - Pulled from GitHub`
-							await updateMsg.edit(text)
-						})
-					
-					text += `\n• ${discordTimestamp(Date.now())} - Restarting`
-					await updateMsg.edit(text)
-
-					const fs = require("fs")
-					const config = require("../config.json")
-					config.updated = true
-					config.updateMessageLink = updateMsg.url
-					fs.writeFileSync("./config.json", JSON.stringify(config, null, 4))
-
-					exec("pm2 restart all")
-				}
-			})
+				})
+		} else {
+			exec("git pull")
+			const fs = require("fs")
+			const config = require("../config.json")
+			config.updated = true
+			config.updateMessageLink = "Updated via API."
+			fs.writeFileSync("./config.json", JSON.stringify(config, null, 4))
+			exec("pm2 restart all")
+		}
 	}
 }

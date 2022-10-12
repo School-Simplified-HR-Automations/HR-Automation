@@ -90,7 +90,7 @@ module.exports = {
 												return
 											})
 									}
-									message.channel.send(`\`\`\`js\n${cleaned}\n\`\`\``)
+									message.channel.send(`\`\`\`ts\n${cleaned}\n\`\`\``)
 								}
 							}
 						})
