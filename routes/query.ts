@@ -1,6 +1,8 @@
 import AuthQueryRoutes from "./AuthQueryRoutes";
 import DepartmentQueryRoutes from "./DepartmentQueryRoutes";
+import PositionHistoriesQueryRoutes from "./PositionHistoriesQueryRoutes";
 import PositionQueryRoutes from "./PositionQueryRoutes";
+import RecordQueryRoutes from "./RecordQueryRoutes";
 import StaffFileQueryRoutes from "./StaffFileQueryRoutes";
 import SupervisorQueryRoutes from "./SupervisorQueryRoutes";
 import TeamQueryRoutes from "./TeamQueryRoutes";
@@ -16,4 +18,6 @@ export default class Query {
     static teams = new TeamQueryRoutes()
     static supervisors = new SupervisorQueryRoutes()
     static auth = new AuthQueryRoutes()
+    static records = new RecordQueryRoutes()
+    static positionHistory = new PositionHistoriesQueryRoutes()
 }

@@ -2,6 +2,7 @@ import { NumberDataType, QueryTypes } from "sequelize";
 import { dbSql } from "..";
 import { Permit } from "../types/common/ReturnTypes";
 import { v4 as uuid } from "uuid";
+import sanitizer from "../utils/sanitizer";
 
 /**
  * Handles authorization headers in certain restricted actions.
@@ -14,10 +15,9 @@ export default class AuthQueryRoutes {
      * @returns Permit level of target user.
      */
     async getPermit(id: string, user: string): Promise<number> {
+        sanitizer("discordId", id, user)
         let retperm = (await dbSql.query(`SELECT * FROM apiauths WHERE authid = ${id}`, { type: QueryTypes.SELECT }) as Permit[])[0] ?? 0
-        console.log(retperm)
-        console.log(user)
-        if (user !== retperm.authid) throw new Error("Access Forbidden: Permit 10 required to view other users' permit details.")
+        if (user !== retperm.authid && id !== user) throw new Error("Access Forbidden: Permit 10 required to view other users' permit details.")
         else return retperm.permit
     }
 
@@ -28,8 +28,9 @@ export default class AuthQueryRoutes {
      * @returns Auth Cert of the target user.
      */
     async getAuthCert(id: string, user: string): Promise<Permit> {
+        sanitizer("discordId", id, user)
         let retcert = (await dbSql.query(`SELECT * FROM apiauths WHERE authid = ${id}`, { type: QueryTypes.SELECT }) as Permit[])[0]
-        if (retcert.authid !== user) throw new Error("Access Forbidden: Permit 10 required to view other users' permit details.")
+        if (retcert.authid !== user && id !== user) throw new Error("Access Forbidden: Permit 10 required to view other users' permit details.")
         else return retcert
     }
 
@@ -41,8 +42,10 @@ export default class AuthQueryRoutes {
      * @returns Void promise.
      */
     async assignAuthCert(id: string, user: string, permitlvl: number): Promise<void> {
+        sanitizer("discordId", id, user)
+        sanitizer("number", `${permitlvl}`)
         let userperm = await this.getPermit(user, user)
-        if (userperm < 10) throw new Error("Access Forbidden: Permit 10 required to assign new auth certificates.")
+        if (userperm < 10 && id !== user) throw new Error("Access Forbidden: Permit 10 required to assign new auth certificates.")
         await dbSql.query(`INSERT INTO apiauths (authid, admin, backup, createdAt, updatedAt, permit) VALUES ('${id}', '${user}', '${uuid()}', now(), now(), ${permitlvl})`, { type: QueryTypes.INSERT })
         return
     }
