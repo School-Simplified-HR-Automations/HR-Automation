@@ -4,6 +4,7 @@ import { log } from "../services/logger";
 import { StaffFile as SF } from "../types/common/ReturnTypes"
 import { client } from ".."
 import sendError from "../utils/sendError";
+import renderProfile from "../utils/renderProfile";
 
 client.on("interactionCreate", async (interaction: Interaction) => {
     if (interaction.isSelectMenu()) {
@@ -80,100 +81,7 @@ client.on("interactionCreate", async (interaction: Interaction) => {
         }
         else if (interaction.customId.startsWith("search")) {
             interaction.deferUpdate()
-            const staff: SF = await Query.staff.getStaffById(parseInt(interaction.values[0]))
-            let fname = staff.name.split(" ")[0]
-            let lname = staff.name.split(" ")[1]
-            const embed = new EmbedBuilder().setTitle(staff.name)
-            let descstr = ""
-            let posarr = await Query.positions.getPositionStaff(staff.id)
-            if (posarr.length > 0) {
-                for (let i = 0; i < posarr.length; i++) {
-                    descstr += `*${posarr[i]}*\n`
-                }
-            } else descstr = "No position."
-            embed.setDescription(`${descstr}`)
-            let deptteams = ""
-            let supsstr = ""
-            let deptarr = await Query.departments.getDepartmentStaff(staff.id)
-            let teamarr = await Query.teams.getTeamStaff(staff.id)
-            if (deptarr.length > 0 && teamarr.length > 0) {
-                for (let i = 0; i < deptarr.length; i++) {
-                    let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
-                    deptteams += `*${deptarr[i]} - ${teamarr[i]}*\n`
-                    if (!((await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name == `${fname} ${lname}`)) {
-                        supsstr += `${(await Query.staff.getStaffById((await Query.supervisors.getSupervisorById(team.SupervisorId)).StaffFileId)).name}\n`
-                    }
-                }
-            } else {
-                deptteams = "None"
-                supsstr = ""
-            }
-            let outOfOffice = 0
-            let returnDate;
-            let breakRecord = (await Query.records.getBreakRecords(`${staff.id}`))
-            if (breakRecord.length > 0) {
-                outOfOffice = 2
-                returnDate = breakRecord[0].dateExp
-            } else if (staff.outOfOffice) {
-                outOfOffice = 1
-            }
-            embed
-                .addFields(
-                    {
-                        name: "Departments and Teams",
-                        value: `${deptteams}`,
-                        inline: true
-                    },
-                    {
-                        name: "Direct Supervisors",
-                        value: `${supsstr == '' ? "None" : supsstr}`,
-                        inline: true
-                    },
-                    {
-                        name: "Emails",
-                        value: `Personal: ${staff.personalEmail}\nWork: ${staff.companyEmail}`
-                    },
-                    {
-                        name: "Strikes/Censures/Pips",
-                        value: `${staff.strikes}/${staff.censures}/${staff.pips}`,
-                        inline: true
-                    },
-                    {
-                        name: "On Leave?",
-                        value: `${outOfOffice == 2 ? `On break until <t:${returnDate}:d>` : outOfOffice == 1 ? 'In Out of Office mode.' : "False"}`,
-                        inline: true
-                    }
-                )
-            if (staff.outOfOffice) embed.setColor("Red"); else embed.setColor("Aqua")
-            const menu = new SelectMenuBuilder().setCustomId(`hist-${staff.id}`).addOptions(
-                {
-                    label: "Position History",
-                    description: `${staff.name}'s history at School Simplified.`,
-                    value: `phos-${staff.id}`
-                },
-                {
-                    label: "Break Records",
-                    description: `${staff.name}'s break records.`,
-                    value: `breaks-${staff.id}`
-                },
-                {
-                    label: "Strike Records",
-                    description: `${staff.name}'s strike records.`,
-                    value: `strikes-${staff.id}`
-                },
-                {
-                    label: "Censure Records",
-                    description: `${staff.name}'s censure records.`,
-                    value: `censures-${staff.id}`
-                }
-            )
-            const userpermit = await Query.auth.getPermit(interaction.user.id, interaction.user.id)
-            if (userpermit >= 1) {
-                const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(menu)
-                await interaction.editReply({ embeds: [embed], components: [row] })
-            } else {
-                await interaction.editReply({ embeds: [embed] })
-            }
+            await renderProfile("id", interaction, interaction.values[0].split("-")[1])
         } else if (interaction.customId.startsWith("posalter")) {
             if (interaction.values[0].startsWith("newpos")) {
                 await interaction.deferUpdate()
