@@ -43,40 +43,6 @@ module.exports = {
 								return
 							} else {
 								try {
-									//execute code using child_process.exec
-									/* const stopwatch = new Stopwatch().start()
-									const { stdout, stderr } = await exec(code)
-									stopwatch.stop()
-									const output = await clean(stdout)
-									const errorOutput = await clean(stderr)
-									if(output) {
-										const attachment = new AttachmentBuilder(Buffer.from(output), {
-											name: "output.txt",
-											description: `Output of shell execution by ${message.author.tag}.`,
-										})
-										message.channel.send({
-											content: `${stopwatch.toString()}.`,
-											files: [attachment],
-										})
-									} else if(errorOutput) {
-										const attachment = new AttachmentBuilder(
-											Buffer.from(errorOutput),
-											{
-												name: "error-output.txt",
-												description: `Output of shell execution by ${message.author.tag}.`,
-											}
-										)
-										message.channel.send({
-											content: `${stopwatch.toString()}.`,
-											files: [attachment],
-										})
-
-									} else {
-										message.reply(
-											`${codeBlock("bash", "No output.")}\n${stopwatch.toString()}`
-										)
-									}
-									*/
 									const stopwatch = new Stopwatch()
 									exec(code, (error, stdout, stderr) => {
 										if (error) {

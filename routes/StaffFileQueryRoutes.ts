@@ -265,7 +265,7 @@ export default class StaffFileQueryRoutes {
 
 	async getStaffBySupervisor(supervisorId: number) {
 		sanitizer("number", `${supervisorId}`)
-		let ret: StaffFile = (await this.getStaffById((await Query.supervisors.getSupervisorById(supervisorId)).StaffFileId))
+		let ret: StaffFile = (await this.getStaffById((await Query.supervisors.getSupervisorById(supervisorId))[0].StaffFileId))
 		return ret
 	}
 

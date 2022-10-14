@@ -1,21 +1,16 @@
 // Import Header
-import { Collection } from "@discordjs/collection"
-import { Interaction, Client, GatewayIntentBits, Message, Partials, EmbedBuilder } from "discord.js"
+import {Collection} from "@discordjs/collection"
+import {Client, GatewayIntentBits, Partials} from "discord.js"
 import fs from "fs"
 import path from "path"
-require("dotenv").config()
-import { log } from "./services/logger"
-import { DataTypes, NUMBER, Sequelize } from "sequelize"
-import { Stopwatch } from "@sapphire/stopwatch"
-import { BootCheck } from "./utils/bootCheck"
-import express from "express"
-import cors from "cors"
-import helmet from "helmet"
-import bodyParser from "body-parser"
-import morgan from "morgan"
-import Query from "./routes/query"
+import {log} from "./services/logger"
+import {Sequelize} from "sequelize"
+import {Stopwatch} from "@sapphire/stopwatch"
+import {BootCheck} from "./utils/bootCheck"
 import model from "./models/Models"
 import apiInit from "./legacy/app"
+
+require("dotenv").config()
 const sw = new Stopwatch().start()
 BootCheck.check()
 
@@ -48,7 +43,7 @@ const client: Client = new Client({
 	],
 	partials: [Partials.Channel]
 })
-// @ts-ignore
+
 client.commands = new Collection()
 const commandsPath = path.join(__dirname, "commands")
 const eventsPath = path.join(__dirname, "events")
@@ -88,7 +83,7 @@ process.on("unhandledRejection", (err: Error) => {
 	log.error(err.stack, "unhandledRejection")
 })
 
-var debug = false;
+const debug = false;
 if (debug) {
 	client.on("debug", console.log)
 }

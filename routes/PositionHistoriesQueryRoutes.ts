@@ -32,20 +32,32 @@ export default class PositionHistoriesQueryRoutes {
             await dbSql.query(`INSERT INTO positioninfos
             (StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt)
             VALUES (${id}, ${position.id}, ${position.TeamId}, ${position.DepartmentId}, now(), now());`)
-            const newrowid = dbSql.query(`SELECT id FROM positioninfos WHERE StaffFileId = ${id} ORDER BY id DESC LIMIT 1`)
+            const newrowid = (await dbSql.query(`SELECT * FROM positioninfos WHERE StaffFileId = ${id} ORDER BY id DESC LIMIT 1`, { type: QueryTypes.SELECT }) as PositionHistory[])[0].id
             await dbSql.query(`UPDATE positionhistories
             SET positioninfoId = ${newrowid}
             WHERE (StaffFileId = ${id} AND title = '${position.title}')`)
+            const supervisor = await Query.supervisors.getSupervisorById(position.id)
+            if (supervisor.length > 0) {
+                await dbSql.query(`UPDATE supervisors
+                SET StaffFileId = ${id}
+                WHERE id = ${position.id}`)
+            }
             return 0
         } else {
             schedule.scheduleJob(joinDate, async function () {
                 await dbSql.query(`INSERT INTO positioninfos
             (StaffFileId, PositionId, TeamId, DepartmentId, createdAt, updatedAt)
             VALUES (${id}, ${position.id}, ${position.TeamId}, ${position.DepartmentId}, now(), now());`)
-                const newrowid = dbSql.query(`SELECT id FROM positioninfos WHERE StaffFileId = ${id} ORDER BY id DESC LIMIT 1`)
+            const newrowid = (await dbSql.query(`SELECT * FROM positioninfos WHERE StaffFileId = ${id} ORDER BY id DESC LIMIT 1`, { type: QueryTypes.SELECT }) as PositionHistory[])[0].id
                 await dbSql.query(`UPDATE positionhistories
             SET positioninfoId = ${newrowid}
             WHERE (StaffFileId = ${id} AND title = '${position.title}')`)
+                const supervisor = await Query.supervisors.getSupervisorById(position.id)
+                if (supervisor.length > 0) {
+                    await dbSql.query(`UPDATE supervisors
+                SET StaffFileId = ${id}
+                WHERE id = ${position.id}`)
+                }
             })
             return Math.round(joinDate.getTime() / 1000)
         }
