@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SelectMenuBuilder, ActionRowBuilder, Interaction, SelectMenuInteraction } from "discord.js"
 import Query from "../routes/query"
 import { StaffFile } from "../types/common/ReturnTypes"
+import sanitizer from "./sanitizer"
 
 export default async function renderProfile(filter: "fname" | "lname" | "id" | "name", interaction: ChatInputCommandInteraction | SelectMenuInteraction, query1: number | string, query2?: string) {
     if (interaction instanceof ChatInputCommandInteraction) {
@@ -28,10 +29,7 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
             outOfOffice: 0
         }
         if (filter == "id") {
-            const regex = new RegExp("^\d+$", "gm")
-            if (!(/^\d+$/gm.test(`${query1}`))) {
-                throw new Error("ID query must only consist of numbers.")
-            }
+            sanitizer("number", `${query1}`)
             staff = await Query.staff.getStaffById(query1 as number)
             if (!staff) {
                 const embed = new EmbedBuilder().setTitle("No Results Returned").setColor("Red").setDescription("No results could be found given your search query. If you believe this is in error, please open a ticket with HRIS.")
