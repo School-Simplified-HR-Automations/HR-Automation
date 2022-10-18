@@ -90,15 +90,16 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
         } else if (filter == "name") {
             const fname = query1 as string
             const lname = query2 as string
-            const staff: StaffFile = await Query.staff.getStaffByFullName(`${fname}`, `${lname}`)
+            staff = await Query.staff.getStaffByFullName(`${fname}`, `${lname}`)
             if (!staff) {
                 const embed = new EmbedBuilder().setTitle("No Results Returned").setColor("Red").setDescription("No results could be found given your search query. If you believe this is in error, please open a ticket with HRIS.")
                 return interaction.editReply({ embeds: [embed] })
             }
         }
+        console.log(staff)
         const fname = staff.name.split(" ")[0]
         const lname = staff.name.split(" ")[1]
-        const embed = new EmbedBuilder().setTitle(staff.name)
+        const embed = new EmbedBuilder().setTitle(`${staff.name}`)
         let descstr = ""
         let posarr = await Query.positions.getPositionStaff(staff.id)
         if (posarr.length > 0) {
@@ -216,7 +217,7 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
         const staff = await Query.staff.getStaffById(parseInt(interaction.values[0] as string))
         const fname = staff.name.split(" ")[0]
         const lname = staff.name.split(" ")[1]
-        const embed = new EmbedBuilder().setTitle(staff.name)
+        const embed = new EmbedBuilder().setTitle(`${staff.name}`)
         let descstr = ""
         let posarr = await Query.positions.getPositionStaff(staff.id)
         if (posarr.length > 0) {
