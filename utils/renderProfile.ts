@@ -96,7 +96,6 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
                 return interaction.editReply({ embeds: [embed] })
             }
         }
-        console.log(staff)
         const fname = staff.name.split(" ")[0]
         const lname = staff.name.split(" ")[1]
         const embed = new EmbedBuilder().setTitle(`${staff.name}`)
