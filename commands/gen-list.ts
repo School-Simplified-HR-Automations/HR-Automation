@@ -7,7 +7,10 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("staff-list")
 		.setDescription("Generate a staff list by department or team.")
-        .addStringOption(opt => opt.setName("mode").setDescription("The mode of the list generation (Dept/Team).").addChoices(
+        .addStringOption(opt => 
+        opt.setName("mode")
+        .setDescription("The mode of the list generation (Dept/Team).")
+        .addChoices(
             { name: "Department ID", value: "deptId" },
             { name: "Department Name", value: "deptName" },
             { name: "Team ID", value: "teamId" },
