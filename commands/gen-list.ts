@@ -26,7 +26,6 @@ module.exports = {
             const query = interaction.options.getString("mode", true)
             if (query == "deptId") {
                 const res = await Query.departments.getDepartmentStaffMembers({ deptId: parseInt(interaction.options.getString("value", true))})
-                console.log(res) //TODO
                 const embed = new EmbedBuilder().setTitle("Staff List")
                 for (let i = 0; i < res.teams.length; i++) {
                     const teamName = (await Query.teams.getTeam({ id: res.teams[i].id })).name
