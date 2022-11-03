@@ -16,7 +16,10 @@ module.exports = {
             { name: "Team ID", value: "teamId" },
             { name: "Team Name", value: "teamName" }
         ).setRequired(true))
-        .addStringOption(opt => opt.setName("value").setDescription("Value to search for.").setRequired(true)),
+        .addStringOption(opt => 
+               opt.setName("value")
+               .setDescription("Value to search for.")
+               .setRequired(true)),
 	async execute(interaction: ChatInputCommandInteraction) {
 		try {
             await interaction.deferReply()
