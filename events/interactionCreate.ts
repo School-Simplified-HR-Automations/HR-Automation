@@ -225,8 +225,8 @@ client.on("interactionCreate", async (interaction: Interaction) => {
             const id = interaction.customId.split("-")[1]
             try {
 
-                const titlerow = interaction.fields.fields.some(field => field.customId.startsWith("edittitle"))
-                const joinDaterow = interaction.fields.fields.some(field => field.customId.startsWith("editjoin"))
+                const titlerow = interaction.fields.fields.some((field: any) => field.customId.startsWith("edittitle"))
+                const joinDaterow = interaction.fields.fields.some((field: any) => field.customId.startsWith("editjoin"))
                 if (titlerow) {
                     const title = interaction.fields.getTextInputValue("edittitle")
                     await Query.positions.updatePositionTitle(parseInt(id), title)

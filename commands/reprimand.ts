@@ -7,15 +7,15 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("reprimand")
         .setDescription("(2+/3+) Reprimands a user through a strike or censure.")
-        .addStringOption(opt => opt.setName("type").setDescription("Specifies which reprimand to give.").addChoices(
+        .addStringOption((opt: any) => opt.setName("type").setDescription("Specifies which reprimand to give.").addChoices(
             { name: "Strike", value: "strike" },
             { name: "Censure", value: "censure" }
         ).setRequired(true))
-        .addUserOption(opt => opt.setName("target").setDescription("The ID of the target user.").setRequired(true))
-        .addUserOption(opt => opt.setName("admin").setDescription("The ID of the user who administered the reprimand").setRequired(true))
-        .addStringOption(opt => opt.setName("reason").setDescription("The reason for the reprimand.").setRequired(true))
-        .addBooleanOption(opt => opt.setName("overflow").setDescription("Opt -> If you're issuing a censure, is it because of 5 strikes?"))
-        .addStringOption(opt => opt.setName("details").setDescription("Opt -> A link to a piece of supporting media.").setRequired(false)),
+        .addUserOption((opt: any) => opt.setName("target").setDescription("The ID of the target user.").setRequired(true))
+        .addUserOption((opt: any) => opt.setName("admin").setDescription("The ID of the user who administered the reprimand").setRequired(true))
+        .addStringOption((opt: any) => opt.setName("reason").setDescription("The reason for the reprimand.").setRequired(true))
+        .addBooleanOption((opt: any) => opt.setName("overflow").setDescription("Opt -> If you're issuing a censure, is it because of 5 strikes?"))
+        .addStringOption((opt: any) => opt.setName("details").setDescription("Opt -> A link to a piece of supporting media.").setRequired(false)),
     permit: 2,
     async execute(interaction: ChatInputCommandInteraction, permit: number) {
         try {

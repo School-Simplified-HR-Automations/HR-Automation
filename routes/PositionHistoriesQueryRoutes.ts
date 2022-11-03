@@ -5,20 +5,37 @@ import sanitizer from "../utils/sanitizer";
 import Query from "./query";
 import schedule from "node-schedule"
 
+/**
+ * Routes pertaining to Position History management.
+ */
 export default class PositionHistoriesQueryRoutes {
-
+    /**
+     * Retrieves PositionHistory provided a StaffFile ID.
+     * @param id StaffFile ID.
+     * @returns PositionHistory[]
+     */
     async getHistoryById(id: number) {
         sanitizer("number", `${id}`)
         const ret = (await dbSql.query(`SELECT * FROM positionhistories WHERE StaffFileId = ${id}`, { type: QueryTypes.SELECT }) as PositionHistory[])
         return ret;
     }
-
+    /**
+     * Retrieves PositionHistory by case ID.
+     * @param id PositionHistory case ID.
+     * @returns PositionHistory record.
+     */
     async getHistoryByRecordId(id: number) {
         sanitizer("number", `${id}`)
         const ret = (await dbSql.query(`SELECT * FROM positionhistories WHERE id = ${id}`, { type: QueryTypes.SELECT }) as PositionHistory[])[0]
         return ret
     }
-
+    /**
+     * POST route for adding new PositionHistory records to the database. Also manipulates PositionInfos.
+     * @param title The title of the new position being entered.
+     * @param joinDate The date the staff member will join the position.
+     * @param id The id of the staff member.
+     * @returns Timestamp promise, or 0, for manipulation into messages.
+     */
     async postNewHistory(title: string, joinDate: Date, id: number) {
         sanitizer("name", title)
         sanitizer("timestamp", `${Math.round(joinDate.getTime() / 1000)}`)
@@ -63,7 +80,12 @@ export default class PositionHistoriesQueryRoutes {
         }
 
     }
-
+    /**
+     * Updates the join or quit date of a PositionHistory record.
+     * @param type Join or Quit date update.
+     * @param date Date as a timestamp.
+     * @param id ID of the PositionHistory record.
+     */
     async updateDate(type: "Join" | "Quit", date: number, id: number) {
         sanitizer("timestamp", `${date}`)
         sanitizer("number", `${id}`)
@@ -77,7 +99,16 @@ export default class PositionHistoriesQueryRoutes {
             WHERE id = ${id}`)
         }
     }
-
+    /**
+     * Moves a staff member between positions.
+     * @param title Title of the new position.
+     * @param joinDate Join date of the new position.
+     * @param quitDate Quit date of the old position.
+     * @param id ID of the history record.
+     * @param terms Terms the member is leaving on. True is good, false is bad.
+     * @param reason Optional reason provided to the terms for leaving.
+     * @returns Timestamp promise, or 0, for manipulation into messages.
+     */
     async movePosition(title: string, joinDate: Date, quitDate: Date, id: number, terms: boolean, reason?: string) {
         sanitizer("name", title)
         sanitizer("number", `${id}`)
@@ -140,10 +171,10 @@ export default class PositionHistoriesQueryRoutes {
         }
     }
     /**
-     * 
-     * @param quitDate 
-     * @param id 
-     * @returns 
+     * Removes a staff member from their position.
+     * @param quitDate Date the staff member is to be removed from their position.
+     * @param id The ID of the record.
+     * @returns Timestamp promise, or 0, for manipulation into messages.
      */
 
     async removePosition(quitDate: Date, id: number, terms: boolean, reason?: string) {

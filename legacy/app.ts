@@ -17,6 +17,18 @@ export default function apiInit() {
         console.log("Server started on port 3000")
     })
 
+    class Responses {
+        static readonly NOTFOUND = new Responses(404, 'File not found.')
+        static readonly STAFF404 = new Responses(404, "Staff member not found.")
+        static readonly EMPTY = new Responses(501, "Route not implemented.")
+
+        private constructor(private readonly status: number, public readonly message: any) {}
+
+        toString() {
+            return this.status
+        }
+    }
+
     // API Test Object
 
     const src = [
@@ -33,14 +45,26 @@ export default function apiInit() {
         res.send(src)
     })
 
-    app.get('/users/firstname/:firstname', async (req: any, res: any) => {
+    app.get('/users/', async (req: any, res: any) => {
         res.header("Access-Control-Allow-Origin", "*");
-        res.send(await Query.staff.getStaffByFirstName(`${req.params.firstname}`))
-    })
-
-    app.get('/users/lastname/:lastname', async (req: any, res: any) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.send(await Query.staff.getStaffByLastName(`${req.params.lastname}`))
+        let id = req.query.id
+        if (id) res.send(await Query.staff.getStaffById(parseInt(id)) ?? Responses.NOTFOUND)
+        let fn = req.query.first
+        let ln = req.query.last
+        if (fn && ln) {
+            res.send(await Query.staff.getStaffByFullName(fn, ln) ?? Responses.STAFF404)
+        }
+        else if (fn) {
+            const arr = await Query.staff.getStaffByFirstName(fn)
+            arr.length > 0 ? res.send(arr) : res.send(Responses.STAFF404)
+        }
+        else if (ln) {
+            const arr = await Query.staff.getStaffByLastName(ln)
+            arr.length > 0 ? res.send(arr) : res.send(Responses.STAFF404)
+        }
+        else {
+            res.send(Responses.EMPTY)
+        }
     })
 
     app.get('/users/id', async (req: any, res: any) => {
