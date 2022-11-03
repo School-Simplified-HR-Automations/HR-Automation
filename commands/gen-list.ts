@@ -29,7 +29,7 @@ module.exports = {
                 const embed = new EmbedBuilder().setTitle("Staff List")
                 for (let i = 0; i < res.teams.length; i++) {
                     const teamName = (await Query.teams.getTeam({ id: res.teams[i].id })).name
-                    const teamMembers =  (await Query.teams.getTeamStaffMembers({teamId: res.teams[i].id})).array
+                    const teamMembers = (await Query.teams.getTeamStaffMembers({teamId: res.teams[i].id})).array
                     if (i == 0 && parseInt(interaction.options.getString("value", true)) !== 4) teamMembers.unshift(res.array[0])
                     const formatTeamMembers = teamMembers.map(async s => `${(await Query.staff.getStaffById(s.StaffFileId)).name} - ${(await Query.positions.getPosition({ id: s.PositionId })).title}`)
                     const promres = await Promise.all(formatTeamMembers)
