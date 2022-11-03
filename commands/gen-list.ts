@@ -21,7 +21,7 @@ module.exports = {
                .setDescription("Value to search for.")
                .setRequired(true)),
 	async execute(interaction: ChatInputCommandInteraction) {
-		try {
+           try {
             await interaction.deferReply()
             const query = interaction.options.getString("mode", true)
             if (query == "deptId") {
