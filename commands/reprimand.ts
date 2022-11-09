@@ -7,7 +7,10 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("reprimand")
         .setDescription("(2+/3+) Reprimands a user through a strike or censure.")
-        .addStringOption((opt: any) => opt.setName("type").setDescription("Specifies which reprimand to give.").addChoices(
+        .addStringOption((opt: any) => 
+            opt.setName("type")
+            .setDescription("Specifies which reprimand to give.")
+            .addChoices(
             { name: "Strike", value: "strike" },
             { name: "Censure", value: "censure" }
         ).setRequired(true))
