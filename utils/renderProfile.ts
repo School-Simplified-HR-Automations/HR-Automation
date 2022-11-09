@@ -109,8 +109,8 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
         embed.setDescription(`${descstr}`)
         let deptteams = ""
         let supsstr = ""
-        let deptarr = await Query.departments.getDepartmentStaff(staff.id)
-        let teamarr = await Query.teams.getTeamStaff(staff.id)
+        let deptarr = await Query.departments.getDepartmentMembership(staff.id)
+        let teamarr = await Query.teams.getTeamMembership(staff.id)
         if (deptarr.length > 0 && teamarr.length > 0) {
             for (let i = 0; i < deptarr.length; i++) {
                 let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })
@@ -227,8 +227,8 @@ export default async function renderProfile(filter: "fname" | "lname" | "id" | "
         embed.setDescription(`${descstr}`)
         let deptteams = ""
         let supsstr = ""
-        let deptarr = await Query.departments.getDepartmentStaff(staff.id)
-        let teamarr = await Query.teams.getTeamStaff(staff.id)
+        let deptarr = await Query.departments.getDepartmentMembership(staff.id)
+        let teamarr = await Query.teams.getTeamMembership(staff.id)
         if (deptarr.length > 0 && teamarr.length > 0) {
             for (let i = 0; i < deptarr.length; i++) {
                 let team = await Query.teams.getTeam({ name: `${teamarr[i]}` })

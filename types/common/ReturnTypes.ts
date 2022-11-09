@@ -111,6 +111,16 @@ interface PositionHistory {
 	reason: string
 }
 
+interface PositionInfo {
+	id: number
+	StaffFileId: number
+	PositionId: number
+	TeamId: number
+	DepartmentId: number
+	createdAt: string
+	updatedAt: string
+}
+
 interface StaffFileArray extends Array<StaffFile> { }
 
-export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord, Supervisor, Permit, Record, PositionHistory }
+export { Position, Department, Team, StaffFile, MessageRecord, PositionTableRecord, DepartmentTableRecord, TeamTableRecord, Supervisor, Permit, Record, PositionHistory, PositionInfo }

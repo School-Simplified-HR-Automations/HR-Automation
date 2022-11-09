@@ -9,7 +9,9 @@ import SupervisorQueryRoutes from "./SupervisorQueryRoutes";
 import TeamQueryRoutes from "./TeamQueryRoutes";
 import TicketPanelQueryRoutes from "./TicketPanelQueryRoutes";
 import TicketQueryRoutes from "./TicketQueryRoutes";
-
+/**
+ * Helper class to provide internal API functionality.
+ */
 export default class Query {
     static staff = new StaffFileQueryRoutes()
     static tickets = new TicketQueryRoutes()

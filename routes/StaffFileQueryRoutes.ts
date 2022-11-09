@@ -1,6 +1,6 @@
 import { QueryTypes } from "sequelize"
 import { dbSql } from ".."
-import { Department, Position, StaffFile, Team } from "../types/common/ReturnTypes"
+import { Department, Position, PositionInfo, StaffFile, Team } from "../types/common/ReturnTypes"
 import sanitizer from "../utils/sanitizer"
 import Query from "./query"
 
@@ -299,5 +299,16 @@ export default class StaffFileQueryRoutes {
 			SET censures = @censures + 1
 			WHERE id = ${id}`)
 		}
+	}
+
+	async getStaffByTeamId(id: number) {
+		const staff = (await dbSql.query(`SELECT * FROM positioninfos WHERE TeamId=${id}`, { type: QueryTypes.SELECT }) as PositionInfo[])
+		const res = []
+		for (let i = 0; i < staff.length; i++) {
+			res.push(await Query.staff.getStaffById(staff[i].StaffFileId))
+		}
+
+		return res;
+
 	}
 }
