@@ -41,7 +41,8 @@ module.exports = {
                 interaction.editReply({ embeds: [embed] })
             } else if (query == "deptName") {
                 const res = await Query.departments.getDepartmentStaffMembers({ deptName: interaction.options.getString("value", true)})
-                const embed = new EmbedBuilder().setTitle("Staff List")
+                const embed = new EmbedBuilder()
+                   .setTitle("Staff List")
                 console.log(res)
                 for (let i = 0; i < res.teams.length; i++) {
                     const teamName = (await Query.teams.getTeam({ id: res.teams[i].id })).name
